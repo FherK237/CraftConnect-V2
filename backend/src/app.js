@@ -1,14 +1,18 @@
 const express = require('express');
+const morgan = require('morgan');
 require('dotenv').config();
 
 //Initializacion
+
     const app = express();
 
 //Settings
 
-    app.set('PORT', process.env.PORT || 3000);
+    // app.set('PORT', process.env.PORT || 3000);
 
 //Middlewares
+
+    app.use(morgan('dev'));
 
 //Routes
 
@@ -21,6 +25,6 @@ require('dotenv').config();
 
 //Run Server
 
-    app.listen(app.get('PORT'), () => {
-         console.log(`🚀 ${process.env.APP_NAME} iniciado en modo ${process.env.NODE_ENV} - escuchando en http://localhost:${app.get('PORT')}`);
+    app.listen(process.env.PORT, () => {
+         console.log(`🚀 ${process.env.APP_NAME} iniciado en modo ${process.env.NODE_ENV} - escuchando en http://localhost:${process.env.PORT}`);
     });
