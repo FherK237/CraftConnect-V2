@@ -54,11 +54,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        professional_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        service_id: {
+        contract_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

@@ -46,8 +46,6 @@ const Sequelize = require('../config/database');
             allowNull: false,
             unique: true,
             validate: {
-                trim: true,         // Elimina espacios al inicio y fin
-                isLowercase: true,  // Convierte a minúsculas antes de guardar
                 notEmpty: {
                     msg: 'El correo del usuario no debe ser vacio'
                 },
@@ -114,21 +112,13 @@ const Sequelize = require('../config/database');
         image_user_url: {
             type: DataTypes.TEXT,
             allowNull: true,
-            validate: {
-                notEmpty: {
-                    msg: 'La url de la foto del usuario no puede ser vacía'
-                }
-            }
         },
         latitude: {
             type: DataTypes.DECIMAL(10, 8),
-            allowNull: false,
+            allowNull: true,
             validate: {
                 isDecimal: {
                     msg: 'La latitud debe ser un valor decimal válido.'
-                },
-                notEmpty: {
-                    msg: 'La latitud no puede ser vacía.'
                 },
                 min: {
                     args: [-90],
@@ -142,13 +132,10 @@ const Sequelize = require('../config/database');
         },
         longitude: {
             type: DataTypes.DECIMAL(11, 8),
-            allowNull: false,
+            allowNull: true,
             validate: {
                 isDecimal: {
                     msg: 'La longitud debe ser un valor decimal válido.'
-                },
-                notEmpty: {
-                    msg: 'La longitud no puede ser vacía.'
                 },
                 min: {
                     args: [-180],
@@ -165,9 +152,6 @@ const Sequelize = require('../config/database');
             allowNull: false,
             defaultValue: 'active',
             validate: {
-                notEmpty: {
-                    msg: 'El status del usuario no puede ser vacío'
-                },
                 // 2. Opcional: Validación explícita de inclusión (aunque ENUM ya lo hace a nivel de DB)
                 isIn: {
                     args: [['active','inactive','banned']],

@@ -27,6 +27,9 @@ require('dotenv').config();
         }
     });
 
+    const App = require('./routes/index.routes');
+        app.use('/api', App);
+
 //Public Files
 
 

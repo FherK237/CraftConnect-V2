@@ -46,8 +46,6 @@ const Sequelize = require('../config/database');
             allowNull: false,
             unique: true,
             validate: {
-                trim: true,         // Elimina espacios al inicio y fin
-                isLowercase: true,  // Convierte a minúsculas antes de guardar
                 notEmpty: {
                     msg: 'El correo del profesional no debe ser vacio'
                 },
@@ -83,7 +81,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-       phone: {
+        phone: {
             type: DataTypes.STRING,
             allowNull: true,
             validate: {
@@ -97,14 +95,9 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-         image_user_url: {
+        image_professional_url: {
             type: DataTypes.TEXT,
             allowNull: true,
-            validate: {
-                notEmpty: {
-                    msg: 'La url de la foto del profesional no puede ser vacía'
-                }
-            }
         },
         birth_date: {
             type: DataTypes.DATEONLY,
@@ -121,12 +114,9 @@ const Sequelize = require('../config/database');
             }
         },
         company_name: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: true,
             validate: {
-                notEmpty: {
-                    msg: 'El nombre de la compañia no puede ser vacio.'
-                },
                 min: {
                     args: [3],
                     msg: 'El nombre de la compañia por lo menos debe tener 3 caracteres'
@@ -140,19 +130,11 @@ const Sequelize = require('../config/database');
         description: {
             type: DataTypes.TEXT,
             allowNull: true,
-            validate: {
-                notEmpty: {
-                    msg: 'El "acerca de mi" del profesional no puede ser vacio.'
-                }
-            }
         },
-        experience_year: {
+        experience_years: {
             type: DataTypes.INTEGER,
             allowNull: true,
             validate: {
-                notEmpty: {
-                    msg: 'Los años de experiencia no puede ser vacio'
-                },
                 isInt: {
                     msg: 'Los años de experiencia deben ser un número entero.'
                 },
@@ -166,33 +148,20 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        ine_image_1: {
+        image_ine_front: {
             type: DataTypes.TEXT,
             allowNull: true,
-            validate: {
-                notEmpty: {
-                    msg: 'La url de la foto del ine de frente no puede ser vacía'
-                }
-            }
         },
-        ine_image_2: {
+        image_ine_back: {
             type: DataTypes.TEXT,
             allowNull: true,
-            validate: {
-                notEmpty: {
-                    msg: 'La url de la foto del ine por detras no puede ser vacía'
-                }
-            }
         },
         latitude: {
             type: DataTypes.DECIMAL(10, 8),
-            allowNull: false,
+            allowNull: true,
             validate: {
                 isDecimal: {
                     msg: 'La latitud debe ser un valor decimal válido.'
-                },
-                notEmpty: {
-                    msg: 'La latitud no puede ser vacía.'
                 },
                 min: {
                     args: [-90],
@@ -206,13 +175,10 @@ const Sequelize = require('../config/database');
         },
         longitude: {
             type: DataTypes.DECIMAL(11, 8),
-            allowNull: false,
+            allowNull: true,
             validate: {
                 isDecimal: {
                     msg: 'La longitud debe ser un valor decimal válido.'
-                },
-                notEmpty: {
-                    msg: 'La longitud no puede ser vacía.'
                 },
                 min: {
                     args: [-180],
@@ -227,12 +193,9 @@ const Sequelize = require('../config/database');
         status: {
             type: DataTypes.ENUM('active','inactive','banned'),
             allowNull: false,
-            defaultValue: 'active',
-            validate: {
-                notEmpty: {
-                    msg: 'El status del usuario no puede ser vacío'
-                },
-                // 2. Opcional: Validación explícita de inclusión (aunque ENUM ya lo hace a nivel de DB)
+            defaultValue: 'active', // ✅ Con esto, nunca será vacío
+             validate: {
+                // 💡 ELIMINA notEmpty AQUÍ.
                 isIn: {
                     args: [['active','inactive','banned']],
                     msg: 'Estado no válido. Debe ser uno de: active, inactive, banned'
@@ -242,7 +205,12 @@ const Sequelize = require('../config/database');
         role_id: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+        job_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         }
+        
     }, {
 
         timestamps: true, 
