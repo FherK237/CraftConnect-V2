@@ -57,7 +57,7 @@ const Sequelize = require('../config/database');
         status: {
             type: DataTypes.ENUM('available','unavailable'),
             allowNull: false,
-            defaultValue: available,
+            defaultValue: 'available',
             validate: {
                 notEmpty: {
                     msg: 'El status del horario no puede ser vacío.'

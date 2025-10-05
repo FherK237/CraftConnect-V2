@@ -1,4 +1,4 @@
-const { Datatypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 const Sequelize = require('../config/database');
 
     const Notification = Sequelize.define('Notification', {
@@ -6,14 +6,13 @@ const Sequelize = require('../config/database');
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
-
         },
         recipient_id: {
-            type: Datatypes.INTEGER,
-            allowNull: false,
+            type: DataTypes.INTEGER,
+            allowNull: true,
         },
         recipient_type: {
-            type: Datatypes.ENUM('user','professional'),
+            type: DataTypes.ENUM('user','professional'),
             allowNull: false,
             validate: {
                 notEmpty: {

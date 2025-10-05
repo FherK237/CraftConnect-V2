@@ -72,7 +72,7 @@ const Sequelize = require('../config/database');
             }
         },
         category_id: {
-            type: DataTypes.id,
+            type: DataTypes.INTEGER,
             allowNull: false
         }
     }, {

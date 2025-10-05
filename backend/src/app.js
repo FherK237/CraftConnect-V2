@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const {Category} = require('./models/index');
 require('dotenv').config();
 
 //Initializacion
@@ -13,11 +14,17 @@ require('dotenv').config();
 //Middlewares
 
     app.use(morgan('dev'));
+    app.use(express.json());
 
 //Routes
 
-    app.get('/', (req, res) => {
-        res.send('Hola este la pagina principal');
+    app.get('/', async(req, res) => {
+        try {
+            const categories = await Category.findAll();
+                res.json({categories: categories});
+        } catch (error) {
+            res.status(400).json({message: error.message});
+        }
     });
 
 //Public Files
