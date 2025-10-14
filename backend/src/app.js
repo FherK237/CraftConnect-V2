@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const {Category} = require('./models/index');
+const { Category } = require('./models/index');
 require('dotenv').config();
 
 //Initializacion
@@ -15,8 +15,17 @@ require('dotenv').config();
 
     app.use(morgan('dev'));
     app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
 
 //Routes
+
+    app.get('/dashboard-user', (req, res) => {
+        res.send('Bienvenido usuario :)');
+    });
+
+    app.get('/dashboard-professional', (req, res) => {
+        res.send('Bienvenido professional :)');
+    });
 
     app.get('/', async(req, res) => {
         try {
@@ -27,8 +36,8 @@ require('dotenv').config();
         }
     });
 
-    const App = require('./routes/index.routes');
-        app.use('/api', App);
+    const api = require('./routes/index.routes');
+    app.use('/api', api);
 
 //Public Files
 

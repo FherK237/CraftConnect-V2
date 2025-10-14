@@ -7,7 +7,7 @@ const Sequelize = require('../config/database');
             primaryKey: true, 
             autoIncrement: true
         },
-        name: {
+        firstname: {
             type: DataTypes.STRING, 
             allowNull: false,
             validate: {
@@ -24,7 +24,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        last_name: {
+        lastname: {
             type: DataTypes.STRING, 
             allowNull: false,
             validate: {
@@ -56,30 +56,38 @@ const Sequelize = require('../config/database');
                     args: [5],
                     msg: 'El correo debe por lo menos tener 5 caracteres'
                 },
-                max: {
-                    args: [150],
-                    msg: 'El correo no debe exceder los 150 caracteres'
-                }
+                // max: {
+                //     args: [255],
+                //     msg: 'El correo no debe exceder los 150 caracteres'
+                // }
             }
         },
         password: {
-            type: DataTypes.STRING(255),
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            notEmpty: {
+                msg: 'La contraseña del profesional no puede ser vacía.'
+            },
+            len: {
+                args: [8, 255],
+                msg: 'La contraseña del profesional debe tener al menos 8 caracteres.',
+            },
+          }
+        },
+        failedAttempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false
+        },
+        lockUntil: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        is_verified: {
+            type: DataTypes.BOOLEAN,
             allowNull: false,
-            validate: {
-                notEmpty: {
-                    msg: 'La contraseña del profesional no debe ser vacía'
-                },
-                len: {
-                    // Estándar de seguridad: Mínimo 8 caracteres, Máximo 72 (antes de hashing)
-                    args: [8, 72], 
-                    msg: 'La contraseña debe tener entre 8 y 72 caracteres.'
-                },
-                // 3. Bloquea espacios en blanco (internos y externos)
-                notContains: {
-                    args: ' ',
-                    msg: 'La contraseña no debe contener espacios en blanco.'
-                }
-            }
+            defaultValue: false
         },
         phone: {
             type: DataTypes.STRING,
@@ -95,7 +103,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        image_professional_url: {
+        picture: {
             type: DataTypes.TEXT,
             allowNull: true,
         },
@@ -202,8 +210,9 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        role_id: {
-            type: DataTypes.INTEGER,
+        role: {
+            type: DataTypes.ENUM('user', 'professional'),
+            defaultValue: 'professional',
             allowNull: false
         },
         job_id: {

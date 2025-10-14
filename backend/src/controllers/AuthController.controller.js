@@ -1,155 +1,222 @@
-const { User, Professional, Role } = require('../models/index');
+const { User, Professional, RevokedToken } = require('../models/index');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
-    
+const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
+const {sendVerificationEmail} = require('../utils/email');
 
-    const RegisterForm = async(req, res) => {
-        
+require('dotenv').config();
+
+    exports.formRegisterUser = async(req, res) => {
         try {
-
-            res.send('Formulario de registro');
-
+            res.send('Formulario de Registro de usuarios');
         } catch (error) {
-            res.status(500).json({message: 'Error de configuración interna', error: error.message})
+            console.log(error);
+            res.status(500).json({message: error.message});
         }
     }
 
-    const register = async(req, res) => {
-        
+    exports.formRegisterProfessional = async(req, res) => {
         try {
-            
-            const { name, last_name, email, password, accountType } = req.body;
-            
-            // 1. Validación Básica
-            if ( !email || !password ) return res.status(400).json({ message: 'El Correo y Contraseña son obligatorios.' });
-            if( !name || !last_name ) return res.status(400).json({message: 'El nombre(s) y Apellidos son obligatorios'});
-           
-            // 2. Hash de Contraseña
-            const hashedPassword = await bcrypt.hash(password, 10);
+            res.send('Formulario de Registro del professional');
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({message: error.message});
+        }
+    }
 
-            // 3. Determinar el rol y el modelo a usar
-            const rol_name = accountType ? 'Professional' : 'User'; 
 
-            const rol = await Role.findOne({ where: { name: rol_name }}); // determinar el id
 
-            if (!rol) return res.status(500).json({message: `El rol: ${rol_name} no existe.`})
+    exports.register = async(req, res) => {
 
-            let newUser;
-            let rol_id = rol.id;
+        try {
+            //Validar campos
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-                if (accountType) {
-                    //registrarse como profesional
+            const { firstname, lastname, email, password, role } = req.body;
+
+            //Validar que se hayan enviado los campos:
+            if ( !firstname || !lastname || !email || !role ) return res.status(400).json({message: 'Todos los campos son obligatorios'});
+
+            // Validar que no exista un email duplicado en users o profesionales
+            const existingEmail = 
+            ( await User.findOne({ where: { email }}) ) || ( await Professional.findOne({ where: { email }}) );
+            // if (existingEmail) return res.status(400).json({ message: 'El correo ya esta registrado.'});
+
+            // //Encriptar la contraseña
+            const hashedPassoword = await bcrypt.hash(password, 10);
+
+            let user;
+            // Crear usuario segun el rol
+            if (role === 'user') {
+                user = await User.create({
+                    firstname: firstname,
+                    lastname: lastname,
+                    email: email,
+                    password: hashedPassoword,
+                    role: 'user'
+                });
+            } else if (role === 'professional'){
+                user = await Professional.create({
+                    firstname: firstname,
+                    lastname: lastname,
+                    email: email,
+                    password: hashedPassoword,
+                    role: 'professional'
+                });
+            } else {
+                return res.status(400).json({ message: 'Rol inválido.' });
+            }
+
+            // Generar Token 
+            const payload = { id: user.id, email: user.email, role};
+            const token = jwt.sign( payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES || '1d'} );
+
+            const verificationLink = `http://localhost:3000/api/auth/verify?token=${encodeURIComponent(token)}`;
+
+            await sendVerificationEmail(email, verificationLink);
+
+            res.status(201).json({
+                message:  `Usuario creado. Revisa tu correo para verificar tu cuenta.`,
+                token,
+                user: { id: user.id, email: user.email, role }
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    exports.FormloginUser = async(req, res) => {
+        try {
+            res.send('Formulario de inicio de sesion del usuario');
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+    
+    exports.FormloginProfessional = async(req, res) => {
+        try {
+            res.send('Formulario de inicio de sesion del profesional');
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    exports.login = async(req, res) => {
+        try {
+
+            //Validar campos
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
         
-                    newUser = await Professional.create({
-                        name: name,
-                        last_name: last_name,
-                        email: email,
-                        password: hashedPassword,
-                        role_id: rol_id
-                    });
+            const { email, password } = req.body;
 
-                } else {
-                    // registrarse como usuario
-                    
-                    newUser = await User.create({
-                        name: name,
-                        last_name: last_name,
-                        email: email,
-                        password: hashedPassword,
-                        role_id: rol_id
-                    });
+            if (!email || !password ) return res.status(400).json({ message: 'El correo y contraseña son campos son obligatorios' });
 
+            //Buscar el email en ambas tablas
+            let existingUser = await User.findOne({ where: { email }})
+            let role = 'user';
+
+            if (!existingUser) {
+                existingUser = await Professional.findOne({ where: { email }});
+                if (existingUser) {
+                    role = existingUser.role;
                 }
+            }
 
-            // 4. Generar Token
+            if (!existingUser) return res.status(404).json({message: 'Usuario no encontrado'});
+        
+            // Verificar si la cuenta está bloqueada
+            if (existingUser.lockUntil && existingUser.lockUntil > new Date()) {
+            const minutes = Math.ceil((existingUser.lockUntil - new Date()) / 60000);
+            return res.status(403).json({ msg: `Cuenta bloqueada temporalmente. Intenta en ${minutes} minutos.` });
+            }
+
+            // Comparar contraseñas
+            const validPassword = await bcrypt.compare(password, existingUser.password);
+
+            //Si la contraseña es incorrecta
+            if (!validPassword) {
+                // Incrementar intentos fallidos
+                existingUser.failedAttempts = (existingUser.failedAttempts || 0) + 1;
+
+                // Si supera 5 intentos, bloquear por 15 minutos
+                if (existingUser.failedAttempts >= 5) {
+                    existingUser.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+                }
+                return res.status(401).json({ msg: 'Contraseña incorrecta.' });
+            }    
+
+            // Resetear intentos y bloqueo si la contraseña es correcta
+            existingUser.failedAttempts = 0;
+            existingUser.lockUntil = null;
+            await existingUser.save();
+
+            // Generar token con el rol detectado
             const token = jwt.sign(
-                { id: newUser.id, rol_id: rol_id, type: accountType ? 'Professional' : 'User' },
-                process.env.JWT_SECRET,
-                { expiresIn: '1d' }
+            { id: existingUser.id, role },
+            process.env.JWT_SECRET,
+            { expiresIn: '2h' }
             );
 
-            // 5. Respuesta
-            return res.status(201).json({
-                message: 'Registro exitoso.', 
-                token, 
-                user: { id: newUser.id, email: newUser.email, type: accountType ? 'Professional' : 'User'},
+            // Determinar la redirección según el rol
+            const redirectUrl = role === 'user'
+                ? '/dashboard-user'
+                : '/api/auth/profile';
+
+
+            res.status(200).json({
+                msg: 'Inicio de sesión exitoso.',
+                    user: {
+                        id: existingUser.id,
+                        name: existingUser.firstname,
+                        email: existingUser.email,
+                        role
+                    },
+                token,
+                redirectUrl
             });
-
+                            
         } catch (error) {
-            // Maneja el error de email duplicado (Sequelize validation error)
-            if (error.name === 'SequelizeUniqueConstraintError') {
-                return res.status(409).json({ message: 'El email ya está registrado.' }); 
-            }
             console.log(error);
-            
-                return res.status(500).json({ // ✅ res.status(500) es una función
-                    message: 'Error interno del servidor.', 
-                    error: error.message 
-                });
+            return res.status(500).json({ message: error.message });
         }
+    } 
 
-    }
-
-    const login = async(req, res) => {
-        // 1. Obtener credenciales
-        const { email, password } = req.body;
-        //2. Validar credenciales
-        if (!email || !password) return res.status(500).json({message: 'El correo y la Contraseña son obligatorios.'});
+    exports.logout = async(req, res) => {
         try {
+            console.log('Headers:', req.headers);
 
-        // 3. Buscar al usuario/profesional por email
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(400).json({ message: 'Token requerido o formato inválido.' });
+            }
 
-        //Buscar en profesionals
-        let foundUser = await Professional.findOne({ where: {email: email}});
-        //Buscar en Users
-        let isProfessional = true;
-        
-        if (!foundUser) { 
-            foundUser = await User.findOne({ where: {email: email}});
-            isProfessional = false;
-        }
+            const token = authHeader.split(' ')[1];
 
-        // 3. Verificar si el usuario existe
-        if (!foundUser) {
-            return res.status(401).json({message: 'Credenciales inválidas (Usuario no encontrado).'});
-        }
+            const decoded = jwt.decode(token);
+            if (!decoded || !decoded.exp) {
+                return res.status(400).json({ message: 'Token inválido.' });
+            }
 
-        // 4. Comparar contraseñas
-        const ismatch = await bcrypt.compare(password, foundUser.password);
+            await RevokedToken.create({ token: token, exp: new Date(decoded.exp * 1000) });
 
-        if (!ismatch) return res.status(401).json({ message: 'Credenciales inválidas (Contraseña incorrecta).'});
-
-        // 5. Generar Token JWT
-        const accountType = isProfessional ? 'Professional' : 'User'
-
-        const token = jwt.sign(
-            {
-                id: foundUser.id,
-                rol_id: foundUser.rol_id,
-                accountType: accountType,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: '1d'}
-        );
-
-        // 6. Respuesta de éxito
-        res.status(201).json({
-            message: 'Inicio de sesión con Exito',
-            token, 
-            user: { id: foundUser.id, rol_id: foundUser.rol_id, type: accountType}
-        });
+            res.status(200).json({message: 'Sesión cerrada correctamente.'});
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({
-                message: 'Error interno del servidor.',
-                error: error.message
-            });
+            return res.status(500).json({ message: error.message });
         }
     }
 
     module.exports = {
-        RegisterForm: RegisterForm,
-        register: register,
-        login: login
+        formRegisterUser: this.formRegisterUser,
+        formRegisterProfessional: this.formRegisterProfessional,
+        register: this.register,
+        FormloginUser: this.FormloginUser,
+        FormloginProfessional: this.FormloginProfessional,
+        login: this.login,
+        logout: this.logout
     }

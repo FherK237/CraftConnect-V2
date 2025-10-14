@@ -5,8 +5,6 @@ const Sequelize = require('../config/database');
     // ==========================
     const User = require('./User');
     const Professional = require('./Professional');
-    const Role = require('./Role');
-    const Permission = require('./Permission');
     const Category = require('./Category');
     const Service = require('./Service');
     const Schedule = require('./Schedule');
@@ -18,35 +16,8 @@ const Sequelize = require('../config/database');
 
     const Conversation = require('./Conversation');
     const Notification = require('./Notification');
+    const RevokedToken = require('./RevokedToken');
 
-    // Modelo intermedio
-    const RolePermission = require('./RolePermission');
-
-    // ==========================
-    // Roles ↔ Users / Professionals
-    // ==========================
-    User.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
-    Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
-
-    Professional.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
-    Role.hasMany(Professional, { foreignKey: 'role_id', as: 'professionals' });
-
-    // ==========================
-    // Roles ↔ Permissions (Many-to-Many)
-    // ==========================
-    Role.belongsToMany(Permission, {
-        through: RolePermission,
-        foreignKey: 'role_id',
-        otherKey: 'permission_id',
-        as: 'permissions'
-    });
-
-    Permission.belongsToMany(Role, {
-        through: RolePermission,
-        foreignKey: 'permission_id',
-        otherKey: 'role_id',
-        as: 'roles'
-    });
 
     // ==========================
     // Professionals ↔ Schedules (1:N)
@@ -99,18 +70,11 @@ const Sequelize = require('../config/database');
     });
 
     // ==========================
-    // Contract ↔ Portfolio (1:1)
+    // comission ↔ Services (1:N)
     // ==========================
+    Comission.hasMany(Service, { foreignKey: 'comission_id', as: 'services' });
+    Service.belongsTo(Comission, { foreignKey: 'comission_id', as: 'Comission' });
 
-    Comission.hasMany(Contract, { 
-        foreignKey: 'comission_id',
-        as: 'contracts'
-    });
-
-    Contract.belongsTo(Comission, {
-        foreignKey: 'comission_id',
-        as: 'comissions'
-    });
 
     // ==========================
     // EXPORTAR MODELOS
@@ -118,16 +82,15 @@ const Sequelize = require('../config/database');
     module.exports = {
         User,
         Professional,
-        Role,
-        Permission,
         Category,
         Service,
         Schedule,
         Contract,
+        Comission,
         Review,
         Portfolio,
         Conversation,
         Notification,
-        RolePermission,
+        RevokedToken,
         Sequelize
     };

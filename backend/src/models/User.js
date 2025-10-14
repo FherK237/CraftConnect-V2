@@ -4,10 +4,10 @@ const Sequelize = require('../config/database');
     const User = Sequelize.define('User', {
         id: {
             type: DataTypes.INTEGER,
-            primaryKey: true, 
+            primaryKey: true,
             autoIncrement: true
         },
-        name: {
+        firstname: {
             type: DataTypes.STRING, 
             allowNull: false,
             validate: {
@@ -24,7 +24,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        last_name: {
+        lastname: {
             type: DataTypes.STRING, 
             allowNull: false,
             validate: {
@@ -63,23 +63,31 @@ const Sequelize = require('../config/database');
             }
         },
         password: {
-            type: DataTypes.STRING(255),
+            type: DataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: {
-                    msg: 'La contraseña del usuario no debe ser vacía'
+                    msg: 'La contraseña del usuario no puede ser vacía.'
                 },
                 len: {
-                    // Estándar de seguridad: Mínimo 8 caracteres, Máximo 72 (antes de hashing)
-                    args: [8, 72], 
-                    msg: 'La contraseña debe tener entre 8 y 72 caracteres.'
+                    args: [8, 255],
+                    msg: 'La contraseña del usuario debe tener al menos 8 caracteres.',
                 },
-                // 3. Bloquea espacios en blanco (internos y externos)
-                notContains: {
-                    args: ' ',
-                    msg: 'La contraseña no debe contener espacios en blanco.'
-                }
             }
+        },
+        failedAttempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false
+        },
+        lockUntil: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
+        is_verified: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         },
         phone: {
             type: DataTypes.STRING,
@@ -99,17 +107,14 @@ const Sequelize = require('../config/database');
             type: DataTypes.DATEONLY,
             allowNull: true,
             validate: {
-                isDate: {
-                    msg: 'El valor debe ser una fecha válida (YYYY-MM-DD).'
-                },
-                // Opcional: Evita que el usuario ponga una fecha en el futuro
-                isBefore: {
-                    args: new Date().toISOString().split('T')[0], // Usa la fecha de hoy
-                    msg: 'La fecha de nacimiento no puede ser una fecha futura.'
+                isBeforeToday(value) {
+                    if (value && new Date(value) > new Date()) {
+                    throw new Error('La fecha de nacimiento no puede ser futura.');
+                    }
                 }
             }
         },
-        image_user_url: {
+        picture: {
             type: DataTypes.TEXT,
             allowNull: true,
         },
@@ -159,10 +164,11 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        role_id: {
-            type: DataTypes.INTEGER,
+        role: {
+            type: DataTypes.ENUM('user', 'professional'),
+            defaultValue: 'user',
             allowNull: false
-        }
+        },
     }, {
 
         timestamps: true, 
