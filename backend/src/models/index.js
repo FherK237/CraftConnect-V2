@@ -8,15 +8,19 @@ const Sequelize = require('../config/database');
     const Category = require('./Category');
     const Service = require('./Service');
     const Schedule = require('./Schedule');
-    const Contract = require('./Contract');
     const Review = require('./Review');
     const Comission = require('./Comission');
     const Portfolio = require('./Portfolio');
-
+    const Job = require('./Jobs');
+    const PortfolioImage = require('./PortfolioImage');
+    const ServiceImage = require('./ServiceImage');
 
     const Conversation = require('./Conversation');
     const Notification = require('./Notification');
     const RevokedToken = require('./RevokedToken');
+
+    const Contract = require('./Contract');
+    const ProfessionalService = require('./ProfessionalService');
 
 
     // ==========================
@@ -36,6 +40,13 @@ const Sequelize = require('../config/database');
 
     Service.hasMany(Contract, { foreignKey: 'service_id', as: 'contracts' });
     Contract.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
+
+    // ==========================
+    // Categories ↔ Services (1:N)
+    // ==========================
+    Job.hasMany(Professional, {foreignKey: 'job_id', as: "professionals"});
+    Professional.belongsTo(Job, {foreignKey: 'job_id', as: 'job'})
+
 
     // ==========================
     // Categories ↔ Services (1:N)
@@ -75,11 +86,37 @@ const Sequelize = require('../config/database');
     Comission.hasMany(Service, { foreignKey: 'comission_id', as: 'services' });
     Service.belongsTo(Comission, { foreignKey: 'comission_id', as: 'Comission' });
 
+    // ==========================
+    // service ↔ service_images (1:N)
+    // ==========================
+
+    Service.hasMany(ServiceImage, { foreignKey: 'service_id', as: 'service_images' });
+    ServiceImage.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
+
+    // ==========================
+    // portfolio ↔ portfolio_images (1:N)
+    // ==========================
+
+    Portfolio.hasMany(PortfolioImage, { foreignKey: 'portfolio_id', as: 'portfolio_images' });
+    PortfolioImage.belongsTo(Portfolio, { foreignKey: 'portfolio_id', as: 'portafolio' });
+
+    // ==========================
+    // professional ↔ professional_service / service ↔ professional_service (N:N)
+    // ==========================
+
+    Service.hasMany(ProfessionalService, { foreignKey: 'service_id', as: 'professional_service' });
+    ProfessionalService.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
+
+    Professional.hasMany(ProfessionalService, { foreignKey: 'professional_id', as: 'professional_service' });
+    ProfessionalService.belongsTo(Professional, { foreignKey: 'professional_id', as: 'professional' });
+
+
 
     // ==========================
     // EXPORTAR MODELOS
     // ==========================
     module.exports = {
+        Job,
         User,
         Professional,
         Category,
@@ -92,5 +129,8 @@ const Sequelize = require('../config/database');
         Conversation,
         Notification,
         RevokedToken,
+        ProfessionalService,
+        ServiceImage,
+        PortfolioImage,
         Sequelize
     };

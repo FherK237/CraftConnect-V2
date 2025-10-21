@@ -33,29 +33,6 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        image_url: {
-            type: DataTypes.TEXT,
-            allowNull: false,
-            validate: {
-                notEmpty: 'La URL de la imagen del servicio no puede ser vacia'
-            }
-        },
-        price: {
-            type: DataTypes.DECIMAL(10, 2), 
-            allowNull: false,
-            validate: {
-                notEmpty: {
-                    msg: 'El precio es obligatorio y no puede estar vacío.'
-                },
-                isNumeric: {
-                    msg: 'El precio debe ser un valor numérico válido.'
-                },
-                min: {
-                    args: [0.01], 
-                    msg: 'El precio debe ser mayor a cero.'
-                }
-            }
-        },
         status: {
             type: DataTypes.ENUM('active','inactive'),
             allowNull: false,

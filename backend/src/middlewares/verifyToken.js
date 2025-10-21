@@ -6,15 +6,15 @@ const { RevokedToken } = require('../models/index');
     module.exports = async(req, res, next) => {
         try {
 
-
             //Obtener el token del header
             const authHeader = req.headers.authorization;
-
+            console.log(authHeader);
+            
             if (!authHeader || !authHeader.startsWith('Bearer ')) {
                 return res.status(401).json({ message: 'Token invalido o no proporcionado.'})
             }
 
-            const token = authHeader.split(' ')[1]; // Quita el "Bearer"
+            const token = authHeader.replace('Bearer', '').trim();  // Quita el "Bearer"
 
             //Verificar Token no cerro sesión
             const revoked = await RevokedToken.findOne({ where: { token } });
@@ -30,6 +30,7 @@ const { RevokedToken } = require('../models/index');
 
             next();
         } catch (error) {
-            return res.status(401).json({ message: 'Token inávlido o expirado'});
+            console.log(error);
+            return res.status(401).json({ message: 'Token invalido o expirado'});
         }
     };

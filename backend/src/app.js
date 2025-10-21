@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const { Category } = require('./models/index');
+const path = require('path');
 require('dotenv').config();
 
 //Initializacion

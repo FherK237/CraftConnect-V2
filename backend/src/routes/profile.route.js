@@ -1,0 +1,49 @@
+const { Router } = require('express');
+const ProfileController = require('../controllers/ProfileController.controller');
+const verifyToken = require('../middlewares/verifyToken');
+const checkRole = require('../middlewares/checkRole');
+const { body } = require('express-validator');
+const multer = require('multer');
+
+    const upload = multer({dest: 'src/uploads/profiles'});
+
+    const router = Router();
+
+        // Ruta GET para mostrar el formulario y datos del usuario
+        router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
+
+        // Ruta GET para mostrar el formulario y datos del profesional
+        router.get('/professional', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
+        
+        // Ruta PUT de Personalizacion/Configuracion del usuario
+        router.put('/configure-user', [
+            body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
+            body('lastname').notEmpty().withMessage('Los apeliidos no pueden ser vacios.'),
+        ], 
+            verifyToken, 
+            checkRole(['user']), 
+            upload.single('picture'),
+            ProfileController.ConfigureUser,
+        );
+        
+        // Ruta PUT de Personalizacion/Configuracion de profesional
+        router.put('/configure-professional', [
+            body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
+            body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
+        ], 
+            verifyToken, 
+            checkRole(['professional']), 
+            upload.fields([
+                { name: 'picture', maxCount: 1},
+                { name: 'image_ine_front', maxCount: 1},
+                { name: 'image_ine_back', maxCount: 1}
+            ]),
+            ProfileController.ConfigureProfessional
+        );
+
+        module.exports = router;
+
+
+        function name(params) {
+            
+        }
