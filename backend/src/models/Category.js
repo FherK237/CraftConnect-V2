@@ -33,6 +33,21 @@ const Sequelize = require('../config/database');
                 }
             }
         },
+        status: {
+            type: DataTypes.ENUM('active','inactive'),
+            allowNull: false,
+            defaultValue: 'active',
+            validate: {
+                notEmpty: {
+                    msg: 'El status del servicio no puede ser vacio'
+                },
+                 // 2. Opcional: Validación explícita de inclusión (aunque ENUM ya lo hace a nivel de DB)
+                isIn: {
+                    args: [['active','inactive']],
+                    msg: 'Estado no válido. Debe ser uno de: active, inactive.'
+                }
+            }
+        },
     }, {
 
         timestamps: true, 

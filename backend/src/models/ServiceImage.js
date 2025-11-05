@@ -16,7 +16,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        description: {
+        image_description: {
             type: DataTypes.STRING,
             validate: {
                 notEmpty: {

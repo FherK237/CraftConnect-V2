@@ -7,7 +7,7 @@ const Sequelize = require('../config/database');
             primaryKey: true,
             autoIncrement: true,
         },
-        title: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {

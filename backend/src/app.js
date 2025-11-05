@@ -30,8 +30,8 @@ require('dotenv').config();
 
     app.get('/', async(req, res) => {
         try {
-            const categories = await Category.findAll();
-                res.json({categories: categories});
+            // const categories = await Category.findAll();
+            //     res.json({categories: categories});
         } catch (error) {
             res.status(400).json({message: error.message});
         }

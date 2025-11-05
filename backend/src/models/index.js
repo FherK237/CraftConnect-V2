@@ -81,12 +81,12 @@ const Sequelize = require('../config/database');
     });
 
     // ==========================
-    // comission ↔ Services (1:N)
+    // comission ↔ contract (1:N)
     // ==========================
-    Comission.hasMany(Service, { foreignKey: 'comission_id', as: 'services' });
-    Service.belongsTo(Comission, { foreignKey: 'comission_id', as: 'Comission' });
+    Comission.hasMany(Contract, { foreignKey: 'comission_id', as: 'contracts' });
+    Contract.belongsTo(Comission, { foreignKey: 'comission_id', as: 'Comission' });
 
-    // ==========================
+    // ==========================|
     // service ↔ service_images (1:N)
     // ==========================
 

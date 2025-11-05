@@ -7,7 +7,7 @@ const Sequelize = require('../config/database');
             primaryKey: true, 
             autoIncrement: true
         },
-        price: {
+        base_price: {
             type: DataTypes.DECIMAL(10, 2), 
             allowNull: false,
             validate: {
@@ -33,7 +33,7 @@ const Sequelize = require('../config/database');
                 },
                  // 2. Opcional: Validación explícita de inclusión (aunque ENUM ya lo hace a nivel de DB)
                 isIn: {
-                    args: [['active', 'paused', 'draft']],
+                    args: [['active', 'paused', 'inactive']],
                     msg: 'Estado no válido. Debe ser uno de: active, inactive.'
                 }
             }
@@ -46,7 +46,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        professiona_id: {
+        professional_id: {
             type: DataTypes.INTEGER,
             allowNull: false
         },

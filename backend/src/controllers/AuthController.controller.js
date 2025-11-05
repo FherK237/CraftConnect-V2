@@ -24,8 +24,6 @@ require('dotenv').config();
         }
     }
 
-
-
     exports.register = async(req, res) => {
 
         try {
@@ -37,13 +35,12 @@ require('dotenv').config();
 
             //Validar que se hayan enviado los campos:
             if ( !firstname || !lastname || !email || !role ) return res.status(400).json({message: 'Todos los campos son obligatorios'});
-
+            
             // Validar que no exista un email duplicado en users o profesionales
-            const existingEmail = 
-            ( await User.findOne({ where: { email }}) ) || ( await Professional.findOne({ where: { email }}) );
-            // if (existingEmail) return res.status(400).json({ message: 'El correo ya esta registrado.'});
+            const existingEmail = ( await User.findOne({ where: { email:email }}) ) || ( await Professional.findOne({ where: { email:email }}) );
+            if (existingEmail) return res.status(400).json({ message: 'El correo ya esta registrado, intente con uno nuevo.'});
 
-            // //Encriptar la contraseña
+            //Encriptar la contraseña
             const hashedPassoword = await bcrypt.hash(password, 10);
 
             let user;
