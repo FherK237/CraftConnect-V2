@@ -13,7 +13,6 @@ const multer = require('multer');
    
     // Ruta POST REGISTRAR el servicio a la BASE DE DATOS
     router.post('/service/register', [
-        // body('category_id').notEmpty().withMessage('La categoria no puede ser vacía.'),
         body('service_id').notEmpty().withMessage('El servicio no puede ser vacío.'),
         body('base_price')
             .notEmpty().withMessage('El precio base no puede ser vacío.')
@@ -35,7 +34,7 @@ const multer = require('multer');
     checkRole(['professional']), 
     upload.array('images', 10),
     ProfessionalController.registerService
-);
+    );
 
     // FORMULARIO DE ACTUALIZACION de servicio
     router.get('/update-service/:service_id/:professionalService_id', verifyToken, checkRole(['professional']), ProfessionalController.formUpdateService);
@@ -54,8 +53,61 @@ const multer = require('multer');
     checkRole(['professional']),
     upload.array('images', 10),
     ProfessionalController.updateService
-);
+    );
 
-    router.put('/service/delete/:service_id/:professionalService_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivateService);
+    // Ruta PUT dar de baja el servicio a la BASE DE DATOS
+    router.put('/service/deactivate/:service_id/:professionalService_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivateService);
 
+    // Ruta horarios del professional (dashboard)
+    router.get('/schedule', verifyToken, checkRole(['professional']), ProfessionalController.Schedule);
+
+    // Ruta POST REGISTRAR el horario a la BASE DE DATOS
+    router.post('/schedule/register',[
+        body('day_of_week')
+            .notEmpty().withMessage('El dia de la semana no puede ser vacío.')
+            .isIn(['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']).withMessage('El día de la semana debe ser válido.'),
+        body('start_time')
+            .notEmpty().withMessage('Hora de inicio no puede ser vacía.')
+            .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Formato de hora inválido (HH:mm).'),
+        body('end_time')
+            .notEmpty().withMessage('Hora de fin no puede ser vacía.')
+            .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Formato de hora inválido (HH:mm).'),
+        body().custom((value, { req }) => {
+            const { start_time, end_time } = req.body;
+            if (start_time >= end_time ) throw new Error('La hora de inicio debe ser menor que la hora de fin.');
+         
+        })
+    ],
+    verifyToken, 
+    checkRole(['professional']), 
+    ProfessionalController.registerSchedule
+    );
+
+    // FORMULARIO DE ACTUALIZACION DEL horario
+    router.get('/schedule/update-schedule/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.formUpdateSchedule);
+
+    // Ruta PUT ACTUALIZAR el horario del professional
+    router.put('/schedule/update/:schedule_id',[
+        body('day_of_week')
+            .notEmpty().withMessage('El dia de la semana no puede ser vacío.')
+            .isIn(['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']).withMessage('El día de la semana debe ser válido.'),
+        body('start_time')
+            .notEmpty().withMessage('Hora de inicio no puede ser vacía.')
+            .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Formato de hora inválido (HH:mm).'),
+        body('end_time')
+            .notEmpty().withMessage('Hora de fin no puede ser vacía.')
+            .matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Formato de hora inválido (HH:mm).'),
+        body().custom((value, { req }) => {
+            const { start_time, end_time } = req.body;
+            if (start_time >= end_time ) throw new Error('La hora de inicio debe ser menor que la hora de fin.');
+        }),
+
+    ], 
+    verifyToken, 
+    checkRole(['professional']),
+    ProfessionalController.updateSchedule
+    );
+
+    // Ruta PUT Para dar de baja el horario (por día)
+    router.put('/schedule/deactivate/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivateSchedule);
     module.exports = router;

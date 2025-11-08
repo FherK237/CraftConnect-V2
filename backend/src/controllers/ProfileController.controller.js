@@ -32,6 +32,10 @@ const { saveFile, saveFileProfessional } = require('../utils/saveFile');
 
     exports.ConfigureUser = async(req, res) => {
         try {
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+                
             const { id } = req.user;
             const { firstname, lastname, phone, birth_date, latitude, longitude } = req.body;
             const picture = saveFile(req.file, 'profiles/image_user');
@@ -62,6 +66,10 @@ const { saveFile, saveFileProfessional } = require('../utils/saveFile');
 
     exports.ConfigureProfessional = async(req, res) => {
        try {
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+                
             const { id } = req.user;
             const { 
                     firstname, lastname, phone, 

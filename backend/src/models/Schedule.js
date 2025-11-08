@@ -8,7 +8,7 @@ const Sequelize = require('../config/database');
             autoIncrement: true,
         },
         day_of_week: {
-            type: DataTypes.ENUM('monday','tuesday','wednesday','thursday','friday','saturday','sunday'),
+            type: DataTypes.ENUM('lunes','martes','miercoles','jueves','viernes','sabado','domingo'),
             allowNull: false,
             validate: {
                 notEmpty: {
@@ -16,8 +16,8 @@ const Sequelize = require('../config/database');
                 },
                 // 2. Opcional: Validación explícita de inclusión (aunque ENUM ya lo hace a nivel de DB)
                 isIn: {
-                    args: [['monday','tuesday','wednesday','thursday','friday','saturday','sunday']],
-                    msg: 'Estado no válido. Debe ser uno de: pending, monday, tuesday, wednesday, thursday, friday, saturday, sunday.'
+                    args: [['lunes','martes','miercoles','jueves','viernes','sabado','domingo']],
+                    msg: 'Estado no válido. Debe ser uno de: pending, lunes, martes, miercoles, jueves, viernes, sabado, domingo.'
                 }
             }
         },
@@ -76,7 +76,7 @@ const Sequelize = require('../config/database');
     }, {
 
         timestamps: true, 
-        tableName: 'shedules', 
+        tableName: 'schedules', 
         underscored: true,
         freezeTableName: true
 

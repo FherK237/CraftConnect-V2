@@ -61,7 +61,7 @@ const Sequelize = require('../config/database');
     },
     {
         timestamps: true, 
-        tableName: 'portfolios', 
+        tableName: 'portfolio', 
         underscored: true,
         freezeTableName: true        
     }

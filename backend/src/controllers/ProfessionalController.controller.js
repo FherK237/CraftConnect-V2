@@ -1,8 +1,8 @@
 const { where } = require('sequelize');
-const { Professional, Service, Category, ProfessionalService, ServiceImage } = require('../models/index');
+const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule } = require('../models/index');
 const { saveFile } = require('../utils/saveFile');
 const { Json } = require('sequelize/lib/utils');
-
+const { Op } = require('sequelize');
     exports.formRegisterService = async(req, res) => {
         try {
             const categories = await Category.findAll({ where: { status: 'active' }});
@@ -16,6 +16,10 @@ const { Json } = require('sequelize/lib/utils');
 
     exports.registerService = async(req, res) => {
         try {
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
             const { id } = req.user;
             const { service_id, base_price, professional_description, image_description } = req.body;
 
@@ -81,9 +85,15 @@ const { Json } = require('sequelize/lib/utils');
 
     exports.updateService = async(req, res) => {
         try {
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
             const { service_id, professionalService_id } = req.params;
             const { id } = req.user;
             const { service, base_price, professional_description, images_data} = req.body;
+
+            if (!service || !base_price || !professional_description || !images_data) return res.status(500).json({ message: 'Todos los campos son obligatorios.'});
 
             const profesionalService = await ProfessionalService.update({
                 base_price: base_price,
@@ -145,7 +155,7 @@ const { Json } = require('sequelize/lib/utils');
 
             const [rowsUpdated] = await ProfessionalService.update(
                 {status: 'inactive'}, 
-                    {where: { id: professionalService_id, service_id: service_id, professional_id: id}
+                    {where: { id: professionalService_id, service_id: service_id, professional_id: id }
             });
 
             if (rowsUpdated === 0) {
@@ -161,10 +171,148 @@ const { Json } = require('sequelize/lib/utils');
         }
     }
 
+    exports.registerSchedule = async(req, res) => {
+        try {
+            
+            const { day_of_week, start_time, end_time } = req.body;
+            const { id } = req.user;
+
+            if ( !day_of_week || !start_time || !end_time ) return res.status(500).json({ message: 'Todos los campos son obligatorios'})
+
+            const overlapping = await Schedule.findOne({
+                where: {
+                    professional_id: id,
+                    day_of_week: day_of_week,
+                    status: 'available',
+                    [Op.or]: [
+                        { start_time: { [Op.between]: [start_time, end_time] } },
+                        { end_time: { [Op.between]: [start_time, end_time] } },
+                    ],
+                },
+            });
+
+            if (overlapping) return res.status(400).json({ message: 'Ya tienes un horario que se cruza con este rango.'});
+
+            if (start_time >= end_time) return res.status(400).json({ message: 'La hora de inicio debe ser menor que la hora de fin.' });
+            
+            await Schedule.create({
+                day_of_week: day_of_week,
+                start_time: start_time,
+                end_time: end_time,
+                professional_id: id
+            });
+
+            res.status(200).json({ message: 'Horario Registrado correctamente.'})
+
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: error.message });   
+        }
+    }
+
+    exports.Schedule = async(req, res) => {
+        try {
+            const { id } = req.user;
+            
+            const schedules = await Schedule.findAll({ where: { professional_id: id, status: 'available' }});
+            
+            res.json({ schedules: schedules });
+
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: error.message });   
+        }
+    }
+
+    exports.formUpdateSchedule = async(req, res) => {
+        try {
+            const { schedule_id } = req.params; 
+            const { id } = req.user;
+            
+            const schedule = await Schedule.findAll({ where: { id: schedule_id, professional_id: id }});
+            
+            res.json({ schedule: schedule });
+
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    exports.updateSchedule = async(req, res) => {
+        try {
+
+            const { schedule_id } = req.params;
+            const { id } = req.user;
+            const { day_of_week, start_time, end_time } = req.body;
+
+            if (condition) return res.status()
+
+            const overlapping = await Schedule.findOne({
+                where: {
+                    professional_id: id,
+                    day_of_week: day_of_week,
+                    id: { [Op.ne]: schedule_id },
+                    status: 'available',
+                    [Op.or]: [
+                    { start_time: { [Op.between]: [start_time, end_time] } },
+                    { end_time: { [Op.between]: [start_time, end_time] } },
+                    {
+                        [Op.and]: [
+                        { start_time: { [Op.lte]: start_time } },
+                        { end_time: { [Op.gte]: end_time } },
+                        ],
+                    },
+                    ],
+                },
+                });
+
+            if (overlapping) return res.status(400).json({ message: 'Ya tienes un horario que se cruza con este rango.'});
+
+            if (start_time >= end_time) return res.status(400).json({ message: 'La hora de inicio debe ser menor que la hora de fin.' });
+                
+                
+            await Schedule.update({
+                day_of_week: day_of_week,
+                start_time: start_time,
+                end_time: end_time
+            }, { where: { id: schedule_id, professional_id: id}});
+
+             res.status(200).json({ message: 'Horario Actualizado correctamente.'})
+
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    exports.deactivateSchedule = async(req, res) => {
+        try {
+            const { id } = req.user;
+            const { schedule_id } = req.params;
+
+            await Schedule.update({ status: 'unavailable'}, { where: { id: schedule_id, professional_id: id } });
+
+            res.status(200).json({ message: 'Horario desactivado correctamente.'});
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: error.message });
+        }
+    }
+
+    exports.createContract = async(req, res) => {
+
+    }
+
     module.exports = {
         formRegisterService: this.formRegisterService,
-        registerService: this.registerService,
-        formUpdateService: this.formUpdateService,
-        updateService: this.updateService,
-        deactivateService: this.deactivateService
+        registerService:     this.registerService,
+        formUpdateService:   this.formUpdateService,
+        updateService:       this.updateService,
+        deactivateService:   this.deactivateService,
+        registerSchedule:    this.registerSchedule,
+        Schedule:            this.Schedule,
+        formUpdateSchedule:  this.formUpdateSchedule,
+        updateSchedule: this.updateSchedule,
+        deactivateSchedule: this.deactivateSchedule
     };
