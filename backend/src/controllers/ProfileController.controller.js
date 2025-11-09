@@ -1,5 +1,6 @@
 const { User, Professional, Job } = require('../models/index');
 const { saveFile, saveFileProfessional } = require('../utils/saveFile');
+const { validationResult } = require('express-validator');
 
     exports.formConfigureUser = async(req, res) => {
         try {

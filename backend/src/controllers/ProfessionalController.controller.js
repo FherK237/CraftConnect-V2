@@ -1,8 +1,8 @@
-const { where } = require('sequelize');
 const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule } = require('../models/index');
 const { saveFile } = require('../utils/saveFile');
-const { Json } = require('sequelize/lib/utils');
 const { Op } = require('sequelize');
+const { validationResult } = require('express-validator');
+
     exports.formRegisterService = async(req, res) => {
         try {
             const categories = await Category.findAll({ where: { status: 'active' }});
@@ -150,6 +150,10 @@ const { Op } = require('sequelize');
 
     exports.deactivateService = async(req, res) => {
         try {
+             //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
             const { service_id, professionalService_id } = req.params;
             const { id } = req.user;
 
@@ -173,7 +177,10 @@ const { Op } = require('sequelize');
 
     exports.registerSchedule = async(req, res) => {
         try {
-            
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+                
             const { day_of_week, start_time, end_time } = req.body;
             const { id } = req.user;
 
@@ -213,9 +220,7 @@ const { Op } = require('sequelize');
     exports.Schedule = async(req, res) => {
         try {
             const { id } = req.user;
-            
             const schedules = await Schedule.findAll({ where: { professional_id: id, status: 'available' }});
-            
             res.json({ schedules: schedules });
 
         } catch (error) {
@@ -241,12 +246,13 @@ const { Op } = require('sequelize');
 
     exports.updateSchedule = async(req, res) => {
         try {
-
+            //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+                
             const { schedule_id } = req.params;
             const { id } = req.user;
             const { day_of_week, start_time, end_time } = req.body;
-
-            if (condition) return res.status()
 
             const overlapping = await Schedule.findOne({
                 where: {
