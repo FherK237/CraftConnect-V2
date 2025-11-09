@@ -7,7 +7,7 @@ const ChatBotController = require('../controllers/ChatBotController.controller')
     router.post('/chat', [
         body('message')
             .notEmpty().withMessage('Mensaje bloqueado. Por favor, El mensaje no puede ser vacío.')
-            .custom(value => value <= 800).withMessage('ensaje bloqueado. Por favor, no exceda los 800 caracteres')            
+            .isLength({ max: 800 }).withMessage('Mensaje bloqueado. Por favor, no exceda los 800 caracteres')            
     ],
     ChatBotController.chatGetResponse);
 
