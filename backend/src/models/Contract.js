@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const Sequelize = require('../config/database');
 
+
     const Contract = Sequelize.define('Contract', {
         id: {
             type: DataTypes.INTEGER,
@@ -59,7 +60,7 @@ const Sequelize = require('../config/database');
     }, {
 
         timestamps: true, 
-        tableName: 'bookings', 
+        tableName: 'contracts', 
         underscored: true,
         freezeTableName: true
 
