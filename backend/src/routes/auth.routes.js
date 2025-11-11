@@ -64,7 +64,7 @@ const { User, Professional } = require('../models/index');
             }
             if (updatedRows === 0) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
-            return res.json({ message: 'Cuenta verificada correctamente.' });
+            return res.json({ message: 'Cuenta verificada correctamente. Ya puedes iniciar sesión.' });
 
         } catch (error) {
             console.log("Error en /verify:", error); // <-- imprime el error

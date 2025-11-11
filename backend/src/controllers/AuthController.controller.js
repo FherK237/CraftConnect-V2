@@ -43,8 +43,16 @@ require('dotenv').config();
             }
             
             // Validar que no exista un email duplicado en users o profesionales
-            const existingEmail = ( await User.findOne({ where: { email:email }}) ) || ( await Professional.findOne({ where: { email:email }}) );
+            const existingEmail =
+            ( await User.findOne({ where: { email }}) ) || ( await Professional.findOne({ where: { email }}) );
             if (existingEmail) return res.status(400).json({ message: 'El correo ya esta registrado, intente con uno nuevo.'});
+
+            //GENERAR UN JSON WEB TOKEN PARA UN VALIDACION MAS SEGURA
+            const verificationToken = jwt.sign(
+                {email: email, scope: 'email-verification'},
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' } //Token que expira en una hora
+            );
 
             //Encriptar la contraseña
             const hashedPassoword = await bcrypt.hash(password, 10);
@@ -72,8 +80,9 @@ require('dotenv').config();
             }
 
 
-            const verificationLink = `http://localhost:3000/api/auth/verify?token=${encodeURIComponent(token)}`;
+            const verificationLink = `http://localhost:3001/api/auth/verify?token=${encodeURIComponent(verificationToken)}`;
 
+            //Enviar el correo de verificacion
             await sendVerificationEmail(email, verificationLink);
 
             res.status(201).json({
