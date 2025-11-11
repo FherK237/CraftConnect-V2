@@ -1,8 +1,12 @@
-const { User, Professional, RevokedToken } = require('../models/index');
+const { User, Professional, RevokedToken, Jobs} = require('../models/index');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const {sendVerificationEmail} = require('../utils/email');
+const { sendVerificationEmail, sendResetPasswordEmail } = require('../utils/email'); 
+const crypto = require('crypto');
+const { sequelize, Op } = require('sequelize');
+const nodemailer = require('nodemailer');
+const { profile } = require('console');
 
 require('dotenv').config();
 
@@ -34,7 +38,9 @@ require('dotenv').config();
             const { firstname, lastname, email, password, role } = req.body;
 
             //Validar que se hayan enviado los campos:
-            if ( !firstname || !lastname || !email || !role ) return res.status(400).json({message: 'Todos los campos son obligatorios'});
+            if ( !firstname || !lastname || !email || !role ) {
+                return res.status(400).json({message: 'Todos los campos son obligatorios'});
+            }
             
             // Validar que no exista un email duplicado en users o profesionales
             const existingEmail = ( await User.findOne({ where: { email:email }}) ) || ( await Professional.findOne({ where: { email:email }}) );
@@ -65,25 +71,49 @@ require('dotenv').config();
                 return res.status(400).json({ message: 'Rol inválido.' });
             }
 
-            // Generar Token 
-            const payload = { id: user.id, email: user.email, role};
-            const token = jwt.sign( payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES || '1d'} );
 
             const verificationLink = `http://localhost:3000/api/auth/verify?token=${encodeURIComponent(token)}`;
 
             await sendVerificationEmail(email, verificationLink);
 
             res.status(201).json({
-                message:  `Usuario creado. Revisa tu correo para verificar tu cuenta.`,
-                token,
-                user: { id: user.id, email: user.email, role }
+                message:  `Usuario creado. Revisa tu correo: ${email} para activar tu cuenta.`,
+                verification_token_info: 'El enlace de activacion ha sido enviado al correo registrado.'
             });
 
         } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: error.message });
+            console.error('Error en el registro: ', error);
+            res.status(500).json({ message: 'Error en el servidor intentalo más tarde.' });
         }
     }
+
+    exports.verifyAccount = async (req, res) => {
+        try {
+            const { token } = req.query;
+            console.log("Token recibido en /verify:", token);
+            
+            if (!token) return res.status(400).json({ message: "Token requerido" });
+
+            const decoded = jwt.verify(decodeURIComponent(token), process.env.JWT_SECRET);
+            const email = decoded.email.toLowerCase();
+
+            let [updatedRows] = await User.update({ is_verified: true }, { where: { email } });
+            
+            if (updatedRows === 0 ) {
+                [updatedRows] = await Professional.update({ is_verified: true}, { where: { email } }); 
+            }
+
+            if (updatedRows === 0 ) return res.status(404).json({ message: "Usuario no encontrado"});
+
+            return res.json({ message: "Cuenta verificada correctamente. Ya puedes iniciar sesión."});
+        } catch(error) {
+            console.log("Error en /verify", error);
+            if (error.name === 'tokenExpiredError') {
+                return res.status(400).json({ message: "El enlace ha expirado"});
+            }
+            return res.status(400).json({ message: "Enlace invalido"});
+        }
+    };
 
     exports.FormloginUser = async(req, res) => {
         try {
@@ -110,7 +140,7 @@ require('dotenv').config();
         
             const { email, password } = req.body;
 
-            if (!email || !password ) return res.status(400).json({ message: 'El correo y contraseña son campos son obligatorios' });
+            if (!email || !password ) return res.status(400).json({ message: 'El correo y contraseña son campos obligatorios' });
 
             //Buscar el email en ambas tablas
             let existingUser = await User.findOne({ where: { email }})
@@ -208,6 +238,137 @@ require('dotenv').config();
         }
     }
 
+    exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        // 1. Buscar usuario en ambas tablas
+        let existingUser = await User.findOne({ where: { email } });
+        if (!existingUser) {
+            existingUser = await Professional.findOne({ where: { email } });
+        }
+
+        // 2. Si el usuario no existe, devolvemos un mensaje genérico por seguridad
+        if (!existingUser) {
+            return res.status(200).json({ message: 'Recibirás un enlace para restablecer tu contraseña.' });
+        }
+
+        // 3. Generar Token Único y Temporal (ej: usando crypto o JWT)
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const tokenExpiry = new Date(Date.now() + 3600000); // Token válido por 1 hora (3600000 ms)
+        existingUser.resetTokenExpiry = tokenExpiry;
+        await existingUser.save();
+
+        // 4. Guardar Token y Expiración en la base de datos
+        existingUser.resetToken = resetToken;
+        existingUser.resetTokenExpiry = tokenExpiry;
+        await existingUser.save();
+
+        // 5. Crear el enlace de restablecimiento
+        const resetLink = `http://localhost:3001/api/auth/reset-password/${resetToken}`;
+
+        // 6. Enviar el email
+        await sendResetPasswordEmail(email, resetLink); // <-- Necesitas implementar esta función de email
+
+        res.status(200).json({ 
+            message: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña.',
+            // Opcional: Esto es solo para pruebas en desarrollo, no lo muestres en producción:
+            dev_info: { token: resetToken, link: resetLink } 
+        });
+
+    } catch (error) {
+        console.error('Error en forgotPassword:', error);
+        res.status(500).json({ message: 'Error interno del servidor al procesar la solicitud.' });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        // El token se recibe en la URL (parámetro de ruta) o en el cuerpo. Usaremos URL para este ejemplo.
+        const token = req.params.token; // Si lo pasas como /api/auth/reset-password/:token
+        const { password } = req.body; // Recibir la nueva contraseña
+
+        // 1. Buscar usuario por el token y verificar que no haya expirado
+        let existingUser = await User.findOne({ where: {
+            resetToken: token,
+            resetTokenExpiry: { [Op.gt]: new Date() }
+        } });
+        
+        if (!existingUser) {
+            // Si no se encuentra en User, buscar en Professional
+            existingUser = await Professional.findOne({ where: {
+                resetToken: token,
+                resetTokenExpiry: { [Op.gt]: new Date() }
+            } });
+        }
+
+        // 2. Si el usuario no existe o el token expiró, fallar
+        if (!existingUser) {
+            return res.status(400).json({ message: 'El enlace para restablecer la contraseña es inválido o ha expirado.' });
+        }
+
+        // 3. Hashear y actualizar la nueva contraseña
+        const hashedPassoword = await bcrypt.hash(password, 10);
+        existingUser.password = hashedPassoword;
+
+        // 4. Limpiar el token de restablecimiento para que no se pueda usar de nuevo
+        existingUser.resetToken = null;
+        existingUser.resetTokenExpiry = null;
+        await existingUser.save();
+
+        res.status(200).json({ message: 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.' });
+
+    } catch (error) {
+        console.error('Error en resetPassword:', error);
+        res.status(500).json({ message: 'Error interno del servidor al restablecer la contraseña.' });
+    }
+};
+
+exports.changePassword = async(req,res) => {
+    try {   
+
+        const user = req.user;
+
+        if (!user || !user.id) {
+            return res.status(401).json({ message: "Acceso denegado. Usuario no autenticado."});
+        }
+
+        const { oldPassword, newPassword, confirmNewPassword } = req.body;
+
+       
+        if (!oldPassword || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({ message: "Todos los campos son obligatorios."});
+        }
+
+        if (newPassword !== confirmNewPassword ) {
+            return res.status(400).json({ message: "Las contraseñas nuevas no coinciden"});
+        }
+
+        if (oldPassword === newPassword ) {
+            return res.status(400).json({ message: "La contraseña nueva debe ser diferente a la anterior."})
+
+        }
+
+        console.log('Password del Cliente:', oldPassword);
+        console.log('Hash de la DB:', user.password);
+
+        const isMatch =await bcrypt.compare(oldPassword, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: "La contraseña actual es incorrecta."})
+        }
+
+        const hashedPassoword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassoword;
+
+        await user.save()
+
+        res.status(200).json({ message: 'Contraseña actualizada con exito.'});
+    } catch (error) {
+        console.error('Error al cambiaar contraseña:', error);
+        res.status(500).json({ message: 'Error interno del servidor al cambiar contraseña.'});
+    }
+};
     module.exports = {
         formRegisterUser: this.formRegisterUser,
         formRegisterProfessional: this.formRegisterProfessional,
@@ -215,5 +376,9 @@ require('dotenv').config();
         FormloginUser: this.FormloginUser,
         FormloginProfessional: this.FormloginProfessional,
         login: this.login,
-        logout: this.logout
+        logout: this.logout,
+        verifyAccount: this.verifyAccount,
+        forgotPassword: this.forgotPassword,
+        resetPassword: this.resetPassword,
+        changePassword: this.changePassword
     }

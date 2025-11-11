@@ -169,6 +169,15 @@ const Sequelize = require('../config/database');
             defaultValue: 'user',
             allowNull: false
         },
+        resetToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
+        resetTokenExpiry: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
     }, {
 
         timestamps: true, 

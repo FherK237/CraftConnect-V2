@@ -4,6 +4,7 @@ const verifyToken = require('../middlewares/verifyToken');
 const checkRole = require('../middlewares/checkRole');
 const { body } = require('express-validator');
 const multer = require('multer');
+const verifyJWT = require('../middlewares/authMiddleware');
 
     const upload = multer({ dest: 'src/uploads/images_service'});
     const router = Router();
@@ -110,4 +111,21 @@ const multer = require('multer');
 
     // Ruta PUT Para dar de baja el horario (por día)
     router.put('/schedule/deactivate/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivateSchedule);
+
+
+    //  Ruta para cambiar el switch la disponibilidad del fixer: Disponible(true), Ocupado (false).
+    router.put('/fixer/profile/availability', verifyJWT, ProfessionalController.SwitchAvailable);
+
+    //Ruta para ver lista de oficios
+    router.get('/jobs', ProfessionalController.getJobTittles);
+
+    //Rura para ver fixers con por oficio
+    router.get('/fixers', ProfessionalController.searchFixers);
+
+    //Ruta para visualizar perfil especifico de Fixer
+    router.get('/fixers/:id', ProfessionalController.getFixerProfilePublic);
+
+  
+
+
     module.exports = router;

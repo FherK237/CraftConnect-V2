@@ -1,22 +1,33 @@
 const express = require('express');
 const morgan = require('morgan');
+
+const http = require('http');
+const { Server } = require("socket.io");
+
+
 const { Category } = require('./models/index');
 const path = require('path');
 require('dotenv').config();
 
+
 //Initializacion
+const app = express();
 
-    const app = express();
+//servidor nativo http
+const server = http.createServer(app);
 
-//Settings
-
-    // app.set('PORT', process.env.PORT || 3000);
+const io = new Server(server, {
+    cors: {
+        origin: process.env.CLIENT_URL || "http://localhost:3001",
+        methods: ["GET", "POST"]
+    }
+});
 
 //Middlewares
 
-    app.use(morgan('dev'));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //Routes
 
@@ -30,8 +41,8 @@ require('dotenv').config();
 
     app.get('/', async(req, res) => {
         try {
-            // const categories = await Category.findAll();
-            //     res.json({categories: categories});
+            const categories = await Category.findAll();
+                res.json({categories: categories});
         } catch (error) {
             res.status(400).json({message: error.message});
         }
@@ -43,8 +54,13 @@ require('dotenv').config();
 //Public Files
 
 
+// ======================
+// LOGICA DEL CHAT: CONEXION DE SOCKET.IO
+// ================
+const socketManager = require('./utils/socketManager');
+socketManager(io)
 //Run Server
 
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
          console.log(`🚀 ${process.env.APP_NAME} iniciado en modo ${process.env.NODE_ENV} - escuchando en http://localhost:${process.env.PORT}`);
     });

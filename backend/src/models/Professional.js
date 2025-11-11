@@ -218,7 +218,28 @@ const Sequelize = require('../config/database');
         job_id: {
             type: DataTypes.INTEGER,
             allowNull: true
-        }
+        },
+        resetToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+
+        resetTokenExpiry: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+
+        status: {
+            type: DataTypes.ENUM('active', 'inactive', 'banned'),
+            defaultValue: 'active',
+        },
+        //  CAMPO PARA DISPONIBILIDAD DE TRABAJO
+        is_available: {
+            type: DataTypes.BOOLEAN, // BOOLEAN para mapear TINYINT(1)
+            allowNull: false,
+            defaultValue: true, // Por defecto, el Fixer está disponible
+            comment: 'Estado de disponibilidad para recibir trabajos: 0=Ocupado, 1=Disponible'
+        },
         
     }, {
 
