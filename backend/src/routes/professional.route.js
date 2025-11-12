@@ -114,16 +114,7 @@ const verifyJWT = require('../middlewares/authMiddleware');
 
 
     //  Ruta para cambiar el switch la disponibilidad del fixer: Disponible(true), Ocupado (false).
-    router.put('/fixer/profile/availability', verifyJWT, ProfessionalController.SwitchAvailable);
-
-    //Ruta para ver lista de oficios
-    router.get('/jobs', ProfessionalController.getJobTittles);
-
-    //Rura para ver fixers con por oficio
-    router.get('/fixers', ProfessionalController.searchFixers);
-
-    //Ruta para visualizar perfil especifico de Fixer
-    router.get('/fixers/:id', ProfessionalController.getFixerProfilePublic);
+    router.put('/availability', verifyJWT, ProfessionalController.SwitchAvailable);
 
   
 

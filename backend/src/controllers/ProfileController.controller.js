@@ -1,6 +1,7 @@
-const { User, Professional, Job } = require('../models/index');
+const { Job } = require('../models/index');
 const { saveFile, saveFileProfessional } = require('../utils/saveFile');
 const { validationResult } = require('express-validator');
+
 
     exports.formConfigureUser = async(req, res) => {
         try {
@@ -19,7 +20,7 @@ const { validationResult } = require('express-validator');
         try {
             const { id } = req.user;
             const professional = await Professional.findByPk(id, {
-                attributes: ['firstname', 'lastname', 'phone', 'picture', 'birth_date', 'company_name', 'description', 'experience_years', 'image_ine_front', 'image_ine_back', 'latitude', 'longitude']
+                attributes: ['firstname', 'lastname', 'phone', 'picture', 'birth_date', 'company_name', 'description', 'is_available',  'experience_years', 'image_ine_front', 'image_ine_back', 'latitude', 'longitude']
             });
             const jobs = await Job.findAll();
 
