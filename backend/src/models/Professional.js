@@ -63,9 +63,9 @@ const Sequelize = require('../config/database');
             }
         },
         password: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          validate: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
             notEmpty: {
                 msg: 'La contraseña del profesional no puede ser vacía.'
             },
@@ -73,7 +73,7 @@ const Sequelize = require('../config/database');
                 args: [8, 255],
                 msg: 'La contraseña del profesional debe tener al menos 8 caracteres.',
             },
-          }
+        }
         },
         failedAttempts: {
             type: DataTypes.INTEGER,

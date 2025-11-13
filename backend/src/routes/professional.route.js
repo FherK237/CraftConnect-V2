@@ -11,7 +11,7 @@ const verifyJWT = require('../middlewares/authMiddleware');
 
     // FORMULARIO DE REGISTRO de servicio
     router.get('/service', verifyToken, checkRole(['professional']), ProfessionalController.formRegisterService);
-   
+    
     // Ruta POST REGISTRAR el servicio a la BASE DE DATOS
     router.post('/service/register', [
         body('service_id').notEmpty().withMessage('El servicio no puede ser vacío.'),
@@ -76,17 +76,14 @@ const verifyJWT = require('../middlewares/authMiddleware');
         body().custom((value, { req }) => {
             const { start_time, end_time } = req.body;
             if (start_time >= end_time ) throw new Error('La hora de inicio debe ser menor que la hora de fin.');
-         
         })
     ],
     verifyToken, 
     checkRole(['professional']), 
     ProfessionalController.registerSchedule
     );
-
     // FORMULARIO DE ACTUALIZACION DEL horario
     router.get('/schedule/update-schedule/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.formUpdateSchedule);
-
     // Ruta PUT ACTUALIZAR el horario del professional
     router.put('/schedule/update/:schedule_id',[
         body('day_of_week')

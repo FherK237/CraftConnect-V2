@@ -67,24 +67,24 @@ const { validationResult } = require('express-validator');
     }
 
     exports.ConfigureProfessional = async(req, res) => {
-       try {
+        try {
             //Validar campos
             const errors = validationResult(req);
-                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+            if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
                 
             const { id } = req.user;
             const { 
                     firstname, lastname, phone, 
                     birth_date, company_name, description, 
                     experience_years, latitude, longitude, job_id 
-                  } = req.body;
-                  
+                } = req.body;
+
             const { picture, image_ine_front, image_ine_back } = saveFileProfessional(req.files);
 
             if ( !firstname || !lastname || !phone || !birth_date || !company_name ||
-                 !description || !experience_years || !latitude || !longitude || 
-                 !job_id || !picture || !image_ine_front || !image_ine_back ) {
-                    return res.status(400).json({ message: 'Todos los campos son oblihatorios.'})
+                !description || !experience_years || !latitude || !longitude || 
+                !job_id || !picture || !image_ine_front || !image_ine_back ) {
+                    return res.status(400).json({ message: 'Todos los campos son obligatorios.'})
             }
 
             const dataUpdate = {
@@ -97,10 +97,10 @@ const { validationResult } = require('express-validator');
 
             return res.status(200).json({ message: 'Perfil profesional actualizado correctamente.' });
 
-       } catch (error) {
+            } catch (error) {
             console.log(error);
             return res.status(400).json({ message: error.message });
-       } 
+            } 
     }
 
 

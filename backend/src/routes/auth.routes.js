@@ -4,10 +4,11 @@ const verifyToken = require('../middlewares/verifyToken');
 const checkRole = require('../middlewares/checkRole');
 const jwt = require('jsonwebtoken');
 const { User, Professional } = require('../models/index');
- 
+
     const router = Router();
 
     const AuthController = require('../controllers/AuthController.controller');
+    const verifyJWT = require('../middlewares/authMiddleware');
 
     //Para los formularios de registro
     router.get('/register/user', AuthController.formRegisterUser);
@@ -74,5 +75,13 @@ const { User, Professional } = require('../models/index');
             return res.status(400).json({ message: 'Enlace inválido.' });
         }
     });
+
+    //Solicitud de restablecimiento (se envia el email)
+    router.post('/forgot-password', AuthController.forgotPassword);
+
+    //Aplicacion de restablecimiento (Recibe la nueva contraseña y el token de la URL)
+    router.post('/reset-password/:token', AuthController.resetPassword);
+    //Ruta para cambiar contraseña en caso que se haya olvidado o quiera cambiar
+    router.post('/change-password', verifyJWT, AuthController.changePassword);
 
     module.exports = router;

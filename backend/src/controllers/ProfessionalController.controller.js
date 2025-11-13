@@ -284,7 +284,7 @@ const { validationResult } = require('express-validator');
                 end_time: end_time
             }, { where: { id: schedule_id, professional_id: id}});
 
-             res.status(200).json({ message: 'Horario Actualizado correctamente.'})
+            res.status(200).json({ message: 'Horario Actualizado correctamente.'})
 
         } catch (error) {
             console.log(error);
@@ -434,10 +434,10 @@ exports.getFixerProfilePublic = async (req, res) => {
         registerSchedule:    this.registerSchedule,
         Schedule:            this.Schedule,
         formUpdateSchedule:  this.formUpdateSchedule,
-        updateSchedule: this.updateSchedule,
-        deactivateSchedule: this.deactivateSchedule,
-        SwitchAvailable: this.SwitchAvailable,
-        getJobTittles: this.getJobTittles,
-        searchFixers: this.searchFixers,
+        updateSchedule:      this.updateSchedule,
+        deactivateSchedule:  this.deactivateSchedule,
+        SwitchAvailable:     this.SwitchAvailable,
+        getJobTittles:       this.getJobTittles,
+        searchFixers:        this.searchFixers,
         getFixerProfilePublic: this.getFixerProfilePublic
     };

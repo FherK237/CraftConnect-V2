@@ -23,7 +23,7 @@ const Sequelize = require('../config/database');
                 }
             }
         },
-        commission_amount: {
+        commission: {
             type: DataTypes.DECIMAL(10, 2), 
             allowNull: false,
             validate: {
@@ -52,16 +52,10 @@ const Sequelize = require('../config/database');
             }
         },
 
-        booking_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-
-
     }, {
 
         timestamps: true, 
-        tableName: 'comissions', 
+        tableName: 'commissions', 
         underscored: true,
         freezeTableName: true
 

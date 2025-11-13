@@ -8,6 +8,10 @@ const Sequelize = require('../config/database');
             primaryKey: true,
             autoIncrement: true,
         },
+        price: { 
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false, // Opcional: TRUE si el precio puede ser calculado después
+        },
         start_datetime: {
             type: DataTypes.DATE,
             allowNull: false,
@@ -53,9 +57,9 @@ const Sequelize = require('../config/database');
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        comission_id: {
+        commission_id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
         },
     }, {
 

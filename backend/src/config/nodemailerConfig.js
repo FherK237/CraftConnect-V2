@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST, 
     // Puerto de conexión (comúnmente 587 con TLS o 465 con SSL/TLS)
     port: process.env.MAIL_PORT,
-    secure: false,
+    secure: true,
     // secure: process.env.MAIL_PORT == 465, // True para puerto 465, false para otros (como 587)
     auth: {
         // Tu dirección de correo para enviar emails (ej: no-reply@crafterconnect.com)
