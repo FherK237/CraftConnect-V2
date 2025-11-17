@@ -1,7 +1,7 @@
 const { Job } = require('../models/index');
 const { saveFile, saveFileProfessional } = require('../utils/saveFile');
 const { validationResult } = require('express-validator');
-
+const { User, Professional } = require('../models/index');
 
     exports.formConfigureUser = async(req, res) => {
         try {
@@ -20,7 +20,7 @@ const { validationResult } = require('express-validator');
         try {
             const { id } = req.user;
             const professional = await Professional.findByPk(id, {
-                attributes: ['firstname', 'lastname', 'phone', 'picture', 'birth_date', 'company_name', 'description', 'is_available',  'experience_years', 'image_ine_front', 'image_ine_back', 'latitude', 'longitude']
+                attributes: ['firstname', 'lastname', 'phone', 'picture', 'birth_date', 'company_name', 'description', 'is_available',  'experience_years', 'latitude', 'longitude']
             });
             const jobs = await Job.findAll();
 
@@ -68,27 +68,25 @@ const { validationResult } = require('express-validator');
 
     exports.ConfigureProfessional = async(req, res) => {
         try {
+            
             //Validar campos
             const errors = validationResult(req);
             if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-                
+
             const { id } = req.user;
             const { 
                     firstname, lastname, phone, 
                     birth_date, company_name, description, 
                     experience_years, latitude, longitude, job_id 
                 } = req.body;
+            const picture = saveFile(req.file, 'profiles/image_user');
 
-            const { picture, image_ine_front, image_ine_back } = saveFileProfessional(req.files);
-
-            if ( !firstname || !lastname || !phone || !birth_date || !company_name ||
-                !description || !experience_years || !latitude || !longitude || 
-                !job_id || !picture || !image_ine_front || !image_ine_back ) {
+            if ( !firstname || !lastname ) {
                     return res.status(400).json({ message: 'Todos los campos son obligatorios.'})
             }
 
             const dataUpdate = {
-                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id, ...(picture && { picture }), ...(image_ine_front && { image_ine_front }), ...(image_ine_back && { image_ine_back }),
+                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id, ...(picture && { picture }),
             }
 
             const result = await Professional.update(dataUpdate, { where: { id }});
@@ -98,15 +96,34 @@ const { validationResult } = require('express-validator');
             return res.status(200).json({ message: 'Perfil profesional actualizado correctamente.' });
 
             } catch (error) {
-            console.log(error);
-            return res.status(400).json({ message: error.message });
+                console.log(error);
+                return res.status(400).json({ message: error.message });
             } 
+    }
+
+    exports.IneProfessional = async(req, res) => {
+        try {
+            const { id } = req.user;
+            const { image_ine_front, image_ine_back } = saveFileProfessional(req.files);
+             if (!image_ine_front || !image_ine_back) return res.status(400).json({ message: 'Todos los campos son obligatorios.'});
+
+                const result = await Professional.update({image_ine_front: image_ine_front, image_ine_back: image_ine_back}, { where: { id }});
+
+                if (!result || (Array.isArray(result) && result[0] === 0)) return res.status(404).json({ message: 'Profesional no encontrado o sin cambios' });
+
+                    return res.status(200).json({ message: 'INE agregada correctamente.' });
+
+        } catch (error) {
+            console.log(error);
+                return res.status(400).json({ message: error.message });
+        }
     }
 
 
     module.exports = {
-        formConfigureUser: this.formConfigureUser,
+        formConfigureUser:         this.formConfigureUser,
         formConfigureProfessional: this.formConfigureProfessional,
-        ConfigureUser: this.ConfigureUser,
-        ConfigureProfessional: this.ConfigureProfessional
+        ConfigureUser:             this.ConfigureUser,
+        ConfigureProfessional:     this.ConfigureProfessional,
+        IneProfessional:           this.IneProfessional
     }

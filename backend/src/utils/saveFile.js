@@ -12,15 +12,10 @@ const fs = require('fs');
 
     const saveFileProfessional = (files) => {
         return {
-            picture: saveFile(files?.picture?.[0], 'profiles/image_user'),
             image_ine_front: saveFile(files?.image_ine_front?.[0], 'profiles/docs/ine_front'),
             image_ine_back: saveFile(files?.image_ine_back?.[0], 'profiles/docs/ine_back')
         }
     }
-
-    // const saveFileService = (files) => {
-        
-    // }
 
     module.exports = {
         saveFile,

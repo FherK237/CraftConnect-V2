@@ -45,15 +45,6 @@ const Sequelize = require('../config/database');
                 },
             }
         },
-        image_url: {
-            type: DataTypes.TEXT,
-            allowNull: false,
-            validate: {
-                notEmpty: {
-                    msg: 'La imagen del portafolio no puede ser vacía'
-                }
-            }
-        },
         contract_id: {
             type: DataTypes.INTEGER,
             allowNull: false,

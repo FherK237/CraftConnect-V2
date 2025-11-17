@@ -4,14 +4,13 @@ const verifyToken = require('../middlewares/verifyToken');
 const checkRole = require('../middlewares/checkRole');
 const { body } = require('express-validator');
 const multer = require('multer');
-const verifyJWT = require('../middlewares/authMiddleware');
 
     const upload = multer({ dest: 'src/uploads/images_service'});
     const router = Router();
 
     // FORMULARIO DE REGISTRO de servicio
     router.get('/service', verifyToken, checkRole(['professional']), ProfessionalController.formRegisterService);
-    
+   
     // Ruta POST REGISTRAR el servicio a la BASE DE DATOS
     router.post('/service/register', [
         body('service_id').notEmpty().withMessage('El servicio no puede ser vacío.'),
@@ -76,14 +75,17 @@ const verifyJWT = require('../middlewares/authMiddleware');
         body().custom((value, { req }) => {
             const { start_time, end_time } = req.body;
             if (start_time >= end_time ) throw new Error('La hora de inicio debe ser menor que la hora de fin.');
+         
         })
     ],
     verifyToken, 
     checkRole(['professional']), 
     ProfessionalController.registerSchedule
     );
+
     // FORMULARIO DE ACTUALIZACION DEL horario
     router.get('/schedule/update-schedule/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.formUpdateSchedule);
+
     // Ruta PUT ACTUALIZAR el horario del professional
     router.put('/schedule/update/:schedule_id',[
         body('day_of_week')
@@ -110,10 +112,16 @@ const verifyJWT = require('../middlewares/authMiddleware');
     router.put('/schedule/deactivate/:schedule_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivateSchedule);
 
 
-    //  Ruta para cambiar el switch la disponibilidad del fixer: Disponible(true), Ocupado (false).
-    router.put('/availability', verifyJWT, ProfessionalController.SwitchAvailable);
-
-  
-
+    // Ruta Get de los portafolios del fixer 
+    router.get('/portafolio', verifyToken, ProfessionalController.getPortfolios);
+    
+    // Ruta POST REGISTRAR el portafolio a la BASE DE DATOS
+    router.post('/portafolio/register', [
+        body('title').notEmpty().withMessage('El título del portafolio no puede ser vacío.')
+    ],
+    verifyToken, 
+    checkRole(['professional']),
+    ProfessionalController.registerPortfolio
+    );
 
     module.exports = router;

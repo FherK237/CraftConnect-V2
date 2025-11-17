@@ -13,38 +13,41 @@ const multer = require('multer');
         router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
 
         // Ruta GET para mostrar el formulario y datos del profesional
-        router.get('/fixer', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
+        router.get('/professional', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
         
         // Ruta PUT de Personalizacion/Configuracion del usuario
-        router.put('/configure-user', [
-            body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-            body('lastname').notEmpty().withMessage('Los apeliidos no pueden ser vacios.'),
-        ], 
+        router.put('/configure-user',
+            upload.single('picture'), 
+            [
+                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
+                body('lastname').notEmpty().withMessage('Los apeliidos no pueden ser vacios.'),
+            ], 
             verifyToken, 
             checkRole(['user']), 
-            upload.single('picture'),
             ProfileController.ConfigureUser,
         );
         
         // Ruta PUT de Personalizacion/Configuracion de profesional
-        router.put('/configure-fixer', [
-            body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-            body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
-        ], 
+        router.put('/configure-professional',
+            upload.single('picture'),
+            [
+                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
+                body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
+            ], 
             verifyToken, 
             checkRole(['professional']), 
-            upload.fields([
-                { name: 'picture', maxCount: 1},
-                { name: 'image_ine_front', maxCount: 1},
-                { name: 'image_ine_back', maxCount: 1}
-            ]),
             ProfileController.ConfigureProfessional
         );
 
+//RUTA PUT para subir INE
+        router.put('/configure-ine', 
+            upload.fields([
+                { name: 'image_ine_front', maxCount: 1},
+                { name: 'image_ine_back', maxCount: 1}
+            ]),
+            verifyToken,
+            checkRole(['professional']),
+            ProfileController.IneProfessional
+        );
 
         module.exports = router;
-
-
-        function name(params) {
-            
-        }

@@ -1,4 +1,4 @@
-const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule, Job } = require('../models/index');
+const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule, Job, Portfolio, Contract } = require('../models/index');
 const { saveFile } = require('../utils/saveFile');
 const { Op } = require('sequelize');
 const { validationResult } = require('express-validator');
@@ -421,23 +421,70 @@ exports.getFixerProfilePublic = async (req, res) => {
     }
 };
 
-    exports.createContract = async(req, res) => {
+    exports.getPortfolios = async(req, res) => {
+        const { id } = req.user;
 
+        try {
+            const portfolios = await Portfolio.findAll({ 
+                include: [
+                    {
+                        model: Contract,
+                        as: 'contract',
+                        include: [
+                            {
+                                model: Professional,
+                                as: 'professional',
+                                attributes: ['firstname'],
+                                where: { id : id}
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            res.status(201).json({ message: 'Portafolios del professional', portfolios: portfolios });
+
+                return res.status(200).json({ portfolios: portfolios });
+
+        } catch (error) {
+             console.error("Error al obtener la información del portfolio.", error);
+                 return res.status(500).json({message: "Error del servidor al obtener informacion de los Portafolios."});
+        }
+    }
+
+    exports.registerPortfolio = async(req, res) => {
+        try {
+              //Validar campos
+            const errors = validationResult(req);
+                if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+            const { title } = req.body;
+
+            if (!title) return res.status(500).json({ message: 'Todos los campos son obligatorios'});
+
+            res.json(title)
+
+        } catch (error) {
+            console.error("Error al obtener la información del portfolio.", error);
+                 return res.status(500).json({message: "Error del servidor al registrar Portafolio."});
+        }
     }
 
     module.exports = {
-        formRegisterService: this.formRegisterService,
-        registerService:     this.registerService,
-        formUpdateService:   this.formUpdateService,
-        updateService:       this.updateService,
-        deactivateService:   this.deactivateService,
-        registerSchedule:    this.registerSchedule,
-        Schedule:            this.Schedule,
-        formUpdateSchedule:  this.formUpdateSchedule,
-        updateSchedule:      this.updateSchedule,
-        deactivateSchedule:  this.deactivateSchedule,
-        SwitchAvailable:     this.SwitchAvailable,
-        getJobTittles:       this.getJobTittles,
-        searchFixers:        this.searchFixers,
-        getFixerProfilePublic: this.getFixerProfilePublic
+        formRegisterService:   this.formRegisterService,
+        registerService:       this.registerService,
+        formUpdateService:     this.formUpdateService,
+        updateService:         this.updateService,
+        deactivateService:     this.deactivateService,
+        registerSchedule:      this.registerSchedule,
+        Schedule:              this.Schedule,
+        formUpdateSchedule:    this.formUpdateSchedule,
+        updateSchedule:        this.updateSchedule,
+        deactivateSchedule:    this.deactivateSchedule,
+        SwitchAvailable:       this.SwitchAvailable,
+        getJobTittles:         this.getJobTittles,
+        searchFixers:          this.searchFixers,
+        getFixerProfilePublic: this.getFixerProfilePublic,
+        getPortfolios:         this.getPortfolios,
+        registerPortfolio:     this.registerPortfolio
     };
