@@ -7,7 +7,7 @@ const Sequelize = require('../config/database');
             primaryKey: true,
             autoIncrement: true
         },
-        image_service: {
+        image_url: {
             type: DataTypes.STRING,
             allowNull: false,
             validate: {

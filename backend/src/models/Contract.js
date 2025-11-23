@@ -30,6 +30,18 @@ const Sequelize = require('../config/database');
                 }
             }
         },
+        end_datetime: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: {
+                    msg: 'La fecha y hora de termino son obligatorias.'
+                },
+                isDate: {
+                    msg: 'El valor debe ser una fecha y hora válida.'
+                }
+            }
+        },
         status: {
             type: DataTypes.ENUM('pending', 'confirmed', 'completed', 'canceled'), 
             allowNull: false,
