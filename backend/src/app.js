@@ -62,5 +62,5 @@ socketManager(io)
 //Run Server
 
     server.listen(process.env.PORT, () => {
-         console.log(`🚀 ${process.env.APP_NAME} iniciado en modo ${process.env.NODE_ENV} - escuchando en http://localhost:${process.env.PORT}`);
+        console.log(`🚀 ${process.env.APP_NAME} iniciado en modo ${process.env.NODE_ENV} - escuchando en http://localhost:${process.env.PORT}`);
     });

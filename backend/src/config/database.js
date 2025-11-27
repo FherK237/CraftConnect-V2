@@ -9,7 +9,7 @@ require('dotenv').config();
             "host": process.env.DB_HOST,
             "port": process.env.DB_PORT,
             "dialect": 'mysql',
-            "logging": false
+            "logging": console.log,
         }
     );
 

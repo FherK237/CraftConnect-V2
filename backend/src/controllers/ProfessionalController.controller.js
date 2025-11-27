@@ -1,4 +1,4 @@
-const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule, Job, Portfolio, Contract, PortfolioImage } = require('../models/index');
+const { Professional, Service, Category, ProfessionalService, ServiceImage, Schedule, Job, Portfolio, Contract, PortfolioImage, Review} = require('../models/index');
 const { saveFile } = require('../utils/saveFile');
 const { Op, where } = require('sequelize');
 const { validationResult } = require('express-validator');
@@ -65,7 +65,7 @@ const { parse } = require('dotenv');
             const categories = await Category.findAll({ attributes: ['id','title','description'], where: { status: 'active' }});
             const services = await Service.findAll({ attributes: ['id','name','description'],  where: { status: 'active' }});
             
-           const servicesData = await ProfessionalService.findAll({
+            const servicesData = await ProfessionalService.findAll({
                 where: { 
                     id: professionalService_id, 
                     service_id: service_id, 
@@ -138,7 +138,6 @@ const { parse } = require('dotenv');
 
                     // UPDATE o CREATE
                     if (image_id) {
-                       
                         const updateData = {
                             image_description: image_description,
                             is_main: is_main
@@ -383,40 +382,88 @@ const { parse } = require('dotenv');
     };
 
     //====================
-    // FUNCION PARA CAMBIAR Buscar Fixers por categoria
+    // FUNCION PARA CAMBIAR Buscar Fixers por categoria, zona y calificacion        PROBAR
     //====================
 
-    exports.searchFixers = async (req, res) => {
-        try {
-            console.log("Busqueda de Fixers con filtros.");
-            const { job_id, is_available } = req.query;
+exports.searchFixers = async (req, res) => {
+    try {
+        const { job_id, rating, clientLat, clientLon, radius = 20 } = req.query; // radio por defecto: 20 km
 
-            let soloFixers = {
-                role: 'professional',
-            };
+        let whereClause = {
+            role: 'professional',
+            is_verified: true, // Solo Fixers verificados
+            is_available: true // Por defecto, solo disponibles
+        };
 
-            if (job_id) {
-                soloFixers.job_id = job_id;
-            }
-
-            const fixers = await Professional.findAll({
-                where: soloFixers,
-                attributes: ['id', 'firstname', 'lastname', 'description', 'job_id', 'is_available', 'picture', 'experience_years']
-            });
-
-            if (!fixers || fixers.length === 0 ) {
-                return res.status(404).json({ message: "No existen ningun Fixer con esos filtros"});
-            }
-
-            return res.status(201).json({ 
-                message: "Fixers encontrados con exito.",
-                results: fixers,
-            });
-        } catch (error) {
-            console.error("Error al obtener lista de Fixers");
-            return res.status(500).json({ message: "Error en el servidor al obtener Fixers."})
+        // --- 1. FILTRO POR OFICIO (job_id) ---
+        if (job_id) {
+            whereClause.job_id = job_id;
         }
-    };
+
+        // --- 2. FILTRO POR CALIFICACIÓN (rating) ---
+        // Se añade un filtro de JOIN para buscar Fixers con calificación mínima.
+        const havingClause = {};
+        if (rating) {
+            havingClause['avgRating'] = { [Op.gte]: parseFloat(rating) };
+        }
+
+        // --- 3. CÁLCULO DE UBICACIÓN/DISTANCIA (Haversine) ---
+        let orderClause = [['id', 'ASC']]; // Orden por defecto
+        
+        if (clientLat && clientLon) {
+            // FÓRMULA DE HAVERSINE para calcular la distancia en KM
+            const DISTANCE_CALC = Sequelize.literal(`
+                (6371 * acos(
+                    cos(radians(${clientLat})) * cos(radians(latitude))
+                    * cos(radians(longitude) - radians(${clientLon}))
+                    + sin(radians(${clientLat})) * sin(radians(latitude))
+                ))
+            `);
+
+            // Añadir la distancia al resultado y filtrar por radio
+            whereClause.latitude = { [Op.not]: null }; // Solo Fixers con ubicación registrada
+
+            // Ordenar por la distancia calculada (más cercanos primero)
+            orderClause = [[Sequelize.literal('distance'), 'ASC']];
+            
+            // Si quieres filtrar por un radio máximo:
+            // whereClause[DISTANCE_CALC] = { [Op.lte]: radius };
+        }
+
+        // 4. Ejecutar la Búsqueda (Join para Calificación y Ubicación)
+        const fixers = await Professional.findAll({
+            attributes: {
+                // Selecciona los campos públicos
+                include: [
+                    [Sequelize.fn('AVG', Sequelize.col('Reviews.rating')), 'avgRating'], // Calcula la calificación promedio
+                    ...(clientLat && clientLon ? [[DISTANCE_CALC, 'distance']] : []), // Añade la columna 'distance' si se usan coordenadas
+                ],
+                exclude: ['password', 'status', 'lock_until', 'failed_attempts', 'resetToken', 'resetTokenExpiry']
+            },
+            where: whereClause,
+            include: [{
+                model: Review, // Asume que la tabla Review está correctamente asociada a Professional
+                attributes: [] // No necesitamos los detalles de las reseñas, solo el AVG
+            }],
+            group: ['Professional.id'], // Agrupar por Fixer para calcular el promedio
+            having: havingClause, // Aplicar el filtro de calificación mínima
+            order: orderClause
+        });
+
+        if (!fixers || fixers.length === 0) {
+            return res.status(404).json({ message: "No existen Fixers que coincidan con los criterios de búsqueda."});
+        }
+
+        return res.status(200).json({ 
+            message: "Fixers encontrados con éxito.",
+            results: fixers,
+        });
+
+    } catch (error) {
+        console.error("Error al obtener lista de Fixers:", error);
+        return res.status(500).json({ message: "Error en el servidor al obtener Fixers."})
+    }
+};
 
     exports.getFixerProfilePublic = async (req, res) => {
         try {

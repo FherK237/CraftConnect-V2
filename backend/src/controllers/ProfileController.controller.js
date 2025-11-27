@@ -105,7 +105,7 @@ const { User, Professional } = require('../models/index');
         try {
             const { id } = req.user;
             const { image_ine_front, image_ine_back } = saveFileProfessional(req.files);
-             if (!image_ine_front || !image_ine_back) return res.status(400).json({ message: 'Todos los campos son obligatorios.'});
+            if (!image_ine_front || !image_ine_back) return res.status(400).json({ message: 'Todos los campos son obligatorios.'});
 
                 const result = await Professional.update({image_ine_front: image_ine_front, image_ine_back: image_ine_back}, { where: { id }});
 

@@ -344,11 +344,10 @@ exports.changePassword = async(req,res) => {
 
         const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
-       
         if (!oldPassword || !newPassword || !confirmNewPassword) {
             return res.status(400).json({ message: "Todos los campos son obligatorios."});
         }
-
+        
         if (newPassword !== confirmNewPassword ) {
             return res.status(400).json({ message: "Las contraseñas nuevas no coinciden"});
         }
@@ -357,9 +356,6 @@ exports.changePassword = async(req,res) => {
             return res.status(400).json({ message: "La contraseña nueva debe ser diferente a la anterior."})
 
         }
-
-        console.log('Password del Cliente:', oldPassword);
-        console.log('Hash de la DB:', user.password);
 
         const isMatch =await bcrypt.compare(oldPassword, user.password);
 

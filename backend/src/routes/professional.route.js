@@ -10,7 +10,7 @@ const multer = require('multer');
 
     // FORMULARIO DE REGISTRO de servicio
     router.get('/service/form-register', verifyToken, checkRole(['professional']), ProfessionalController.formRegisterService);
-   
+
     // Ruta POST REGISTRAR el servicio a la BASE DE DATOS
     router.post('/service/register', 
     [

@@ -13,7 +13,7 @@ const multer = require('multer');
         router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
 
         // Ruta GET para mostrar el formulario y datos del profesional
-        router.get('/professional', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
+        router.get('/fixer', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
         
         // Ruta PUT de Personalizacion/Configuracion del usuario
         router.put('/configure-user',
@@ -28,7 +28,7 @@ const multer = require('multer');
         );
         
         // Ruta PUT de Personalizacion/Configuracion de profesional
-        router.put('/configure-professional',
+        router.put('/configure-fixer',
             upload.single('picture'),
             [
                 body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),

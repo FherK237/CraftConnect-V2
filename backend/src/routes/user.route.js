@@ -7,8 +7,8 @@ const multer = require('multer');
     //Ruta para ver lista de oficios
     router.get('/jobs', UserController.getJobTittles);
 
-    //Rura para ver fixers por oficio
-    router.get('/fixers', UserController.searchFixers);
+    //Ruta para ver fixers por oficio
+    router.get('/fixers/search', UserController.searchFixers);
 
     //Ruta para visualizar perfil especifico de Fixer
     router.get('/fixers/:id', UserController.getFixerProfilePublic);

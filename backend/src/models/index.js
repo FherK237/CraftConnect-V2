@@ -110,6 +110,14 @@ const Sequelize = require('../config/database');
     Professional.hasMany(ProfessionalService, { foreignKey: 'professional_id', as: 'professional_service' });
     ProfessionalService.belongsTo(Professional, { foreignKey: 'professional_id', as: 'professional' });
 
+    // Relación Review a Contrato (La Reseña pertenece a UN Contrato)
+    Review.belongsTo(Contract, { foreignKey: 'contract_id' }); 
+    Contract.hasOne(Review, { foreignKey: 'contract_id' }); 
+
+    // Relación Contrato a Fixer (El Contrato pertenece a UN Fixer)
+    // Esta es la relación que asocia el Contrato con el Fixer que lo ejecutó.
+    Contract.belongsTo(Professional, { foreignKey: 'professional_id' }); 
+    Professional.hasMany(Contract, { foreignKey: 'professional_id' });
 
 
     // ==========================

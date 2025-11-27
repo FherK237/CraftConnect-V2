@@ -51,13 +51,6 @@ const Sequelize = require('../config/database');
         underscored: true,
         freezeTableName: true            
 
-    }, {
-
-        timestamps: true, 
-        tableName: 'reviews', 
-        underscored: true,
-        freezeTableName: true
-
     }
 
 );

@@ -202,7 +202,7 @@ const Sequelize = require('../config/database');
             type: DataTypes.ENUM('active','inactive','banned'),
             allowNull: false,
             defaultValue: 'active', // ✅ Con esto, nunca será vacío
-             validate: {
+            validate: {
                 // 💡 ELIMINA notEmpty AQUÍ.
                 isIn: {
                     args: [['active','inactive','banned']],
