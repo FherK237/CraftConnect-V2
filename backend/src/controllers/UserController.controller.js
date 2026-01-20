@@ -64,7 +64,7 @@ exports.searchFixers = async (req, res) => {
             
             // Filtro de radio
             whereConditions[Op.and] = [
-                 Sequelize.literal(`(
+                Sequelize.literal(`(
                     6371 * acos(
                         cos(radians(${userLat})) * cos(radians(Professional.latitude))
                         * cos(radians(Professional.longitude) - radians(${userLng})) + 
@@ -80,7 +80,7 @@ exports.searchFixers = async (req, res) => {
         const ratingLiteral = Sequelize.literal(`(
     SELECT AVG(r.rating)
     FROM reviews AS r
-    INNER JOIN contracts AS c ON r.contract_id = c.id  -- ✅ AQUÍ ESTÁ EL CAMBIO
+    INNER JOIN contracts AS c ON r.contract_id = c.id
     WHERE c.professional_id = Professional.id
 )`);
 
@@ -104,8 +104,7 @@ exports.searchFixers = async (req, res) => {
                 // Incluimos el Job para ver el nombre del oficio
                 { model: Job, as: 'job', attributes: ['title'] }
             ],
-            // 🛑 CORRECCIÓN: Eliminamos el 'include: [Review]' que causaba el error
-            // 🛑 CORRECCIÓN: Eliminamos el 'group' porque la subquery ya agrupa internamente por ID
+            
             having: havingConditions,
             order: distanceAttribute ? [[Sequelize.literal('distance_km'), 'ASC']] : [['id', 'ASC']]
         });

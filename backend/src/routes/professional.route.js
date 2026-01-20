@@ -4,6 +4,7 @@ const verifyToken = require('../middlewares/verifyToken');
 const checkRole = require('../middlewares/checkRole');
 const { body } = require('express-validator');
 const multer = require('multer');
+const verifyJWT = require('../middlewares/authMiddleware');
 
     const upload = multer({ dest: 'src/uploads/images_service'});
     const router = Router();
@@ -139,5 +140,9 @@ const multer = require('multer');
 
     // Ruta PUT Para dar de baja un portafolio
     router.put('/portfolio/deactivate/:portfolio_id/:contract_id', verifyToken, checkRole(['professional']), ProfessionalController.deactivatePortfolio);
+
+    //  Ruta para cambiar el switch la disponibilidad del fixer: Disponible(true), Ocupado (false).
+    router.put('/availability', verifyJWT, ProfessionalController.SwitchAvailable);
+
 
     module.exports = router;

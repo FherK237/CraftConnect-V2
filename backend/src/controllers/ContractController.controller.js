@@ -301,12 +301,46 @@ exports.completeContract = async (req, res) => {
         }
     }
 
+exports.getChatHistory = async (req, res) => {
+    try {
+        const userId = req.user.id; // Tu ID (Fixer o Cliente)
+        const { partnerId } = req.params; // El ID de la persona con la que hablas
+
+        // Validar que partnerId exista
+        if (!partnerId) {
+            return res.status(400).json({ message: 'Falta el ID del participante.' });
+        }
+
+        // Buscar todos los mensajes entre Tú y el Partner
+        const messages = await Conversation.findAll({
+            where: {
+                [Op.or]: [
+                    // Mensajes que YO envié al OTRO
+                    { sender_id: userId, receiver_id: partnerId },
+                    // Mensajes que el OTRO me envió a MÍ
+                    { sender_id: partnerId, receiver_id: userId }
+                ]
+            },
+            // Ordenar del más viejo al más nuevo para que se lean en orden cronológico
+            order: [['created_at', 'ASC']] 
+        });
+
+        return res.status(200).json({
+            message: 'Historial recuperado con éxito.',
+            chatHistory: messages
+        });
+
+    } catch (error) {
+        console.error('Error al obtener historial:', error);
+        return res.status(500).json({ message: 'Error al cargar los mensajes.' });
+    }
+};
+
     exports.getConversationList = async (req, res) => {
     try {
         const currentUser = req.user; // Fixer o Cliente logueado
         const userId = currentUser.id;
         const userType = currentUser.role === 'user' ? 'user' : 'professional';
-
         // 1. Encontrar todos los IDs de usuarios con los que este usuario ha chateado.
         // Se buscan las conversaciones donde el usuario logueado es el remitente O el receptor.
         const conversationPartners = await Conversation.findAll({
@@ -476,6 +510,7 @@ module.exports = {
     viewContract: this.viewContract,
     getConversationList: this.getConversationList,
     registerReview: this.registerReview,
-    generateContractPDF: this.generateContractPDF
+    generateContractPDF: this.generateContractPDF,
+    getChatHistory: this.getChatHistory
 
 };

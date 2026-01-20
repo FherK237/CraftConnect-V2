@@ -18,7 +18,9 @@ router.put('/:contractId/edit', verifyJWT, ContractController.editContract);
 
 router.get('/:contractId/view', verifyJWT, ContractController.viewContract);
 
-router.get('/conversations', verifyJWT, ContractController.getConversationList);
+router.get('/chat/:partnerId', verifyJWT, ContractController.getChatHistory);
+
+router.get('/chats-list', verifyJWT, ContractController.getConversationList);
 
 router.get('/:contractId/pdf', verifyJWT, ContractController.generateContractPDF);
 

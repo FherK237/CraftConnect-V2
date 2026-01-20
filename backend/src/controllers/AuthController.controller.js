@@ -10,7 +10,7 @@ const { profile } = require('console');
 
 require('dotenv').config();
 
-    exports.formRegisterUser = async(req, res) => {
+    exports.formRegisterUser = async (req, res) => {
         try {
             res.send('Formulario de Registro de usuarios');
         } catch (error) {
@@ -78,7 +78,6 @@ require('dotenv').config();
             } else {
                 return res.status(400).json({ message: 'Rol inválido.' });
             }
-
 
             const verificationLink = `http://localhost:3001/api/auth/verify?token=${encodeURIComponent(verificationToken)}`;
 
