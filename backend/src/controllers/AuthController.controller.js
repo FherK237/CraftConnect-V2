@@ -47,17 +47,11 @@ require('dotenv').config();
             ( await User.findOne({ where: { email }}) ) || ( await Professional.findOne({ where: { email }}) );
             if (existingEmail) return res.status(400).json({ message: 'El correo ya esta registrado, intente con uno nuevo.'});
 
-            //GENERAR UN JSON WEB TOKEN PARA UN VALIDACION MAS SEGURA
-            const verificationToken = jwt.sign(
-                {email: email, scope: 'email-verification'},
-                process.env.JWT_SECRET,
-                { expiresIn: '1h' } //Token que expira en una hora
-            );
-
             //Encriptar la contraseña
             const hashedPassoword = await bcrypt.hash(password, 10);
 
             let user;
+            
             // Crear usuario segun el rol
             if (role === 'user') {
                 user = await User.create({
@@ -65,24 +59,36 @@ require('dotenv').config();
                     lastname: lastname,
                     email: email,
                     password: hashedPassoword,
-                    role: 'user'
+                    role: role,
+                    is_verified: false
                 });
-            } else if (role === 'professional'){
+            } else if (role === 'fixer'){
                 user = await Professional.create({
                     firstname: firstname,
                     lastname: lastname,
                     email: email,
                     password: hashedPassoword,
-                    role: 'professional'
+                    role: role,
+                    is_verified: false
                 });
             } else {
                 return res.status(400).json({ message: 'Rol inválido.' });
             }
 
-            const verificationLink = `http://localhost:3001/api/auth/verify?token=${encodeURIComponent(verificationToken)}`;
+            //GENERAR UN JSON WEB TOKEN PARA UN VALIDACION MAS SEGURA
+            const verificationToken = jwt.sign(
+                {id: user.id,
+                    role: role,
+                    scope: 'email-verification'
+                },
+                process.env.EMAIL_SECRET_KEY,
+                { expiresIn: '1h' } //Token que expira en una hora
+            );
+
+            const verificationLink = `http://localhost:5173/verify/${encodeURIComponent(verificationToken)}`;
 
             //Enviar el correo de verificacion
-            await sendVerificationEmail(email, verificationLink);
+            await sendVerificationEmail(user.email, verificationLink);
 
             res.status(201).json({
                 message:  `Usuario creado. Revisa tu correo: ${email} para activar tu cuenta.`,
@@ -96,30 +102,48 @@ require('dotenv').config();
     }
 
     exports.verifyAccount = async (req, res) => {
+        
         try {
-            const { token } = req.query;
+            const { token } = req.params;
             console.log("Token recibido en /verify:", token);
             
             if (!token) return res.status(400).json({ message: "Token requerido" });
 
-            const decoded = jwt.verify(decodeURIComponent(token), process.env.JWT_SECRET);
-            const email = decoded.email.toLowerCase();
-
-            let [updatedRows] = await User.update({ is_verified: true }, { where: { email } });
+            const decoded = jwt.verify(token, process.env.EMAIL_SECRET_KEY);
             
-            if (updatedRows === 0 ) {
-                [updatedRows] = await Professional.update({ is_verified: true}, { where: { email } }); 
+            console.log("Verificando a:", decoded);
+            
+            let account
+
+            if (decoded.role === 'fixer') {
+                account =await Professional.findByPk(decoded.id)
+            } else {
+                account = await User.findByPk(decoded.id)
             }
 
-            if (updatedRows === 0 ) return res.status(404).json({ message: "Usuario no encontrado"});
+            // if (!user) {
+            //     return res.status(404).json({ message: "Usuario no encontrado."})
+            // }
 
-            return res.json({ message: "Cuenta verificada correctamente. Ya puedes iniciar sesión."});
+            // if (user.is_verified) {
+            //     return res.status(200).json({ message: "La cuenta ya estaba verificada." })
+            // }
+
+            account.is_verified = true
+            await account.save()
+
+            return res.status(200).json({ message: "Cuenta verificada, Ya puedes iniciar sesión"})
+            
         } catch(error) {
-            console.log("Error en /verify", error);
-            if (error.name === 'tokenExpiredError') {
+            cconsole.log(" ERROR EN BACKEND:", error.message);
+            if (error.name === 'TokenExpiredError') {
                 return res.status(400).json({ message: "El enlace ha expirado"});
             }
-            return res.status(400).json({ message: "Enlace invalido"});
+
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(400).json({ message: "El enlace está corrupto o no es válido." });
+            }   
+            return res.status(400).json({ message: "Error interno en el servidor."})
         }
     };
 
@@ -150,74 +174,149 @@ require('dotenv').config();
 
             if (!email || !password ) return res.status(400).json({ message: 'El correo y contraseña son campos obligatorios' });
 
-            //Buscar el email en ambas tablas
-            let existingUser = await User.findOne({ where: { email }})
-            let role = 'user';
+            let account = await User.findOne({ where: { email }})
+            let detectedRole = 'user';
 
-            if (!existingUser) {
-                existingUser = await Professional.findOne({ where: { email }});
-                if (existingUser) {
-                    role = existingUser.role;
-                }
+            if (!account) {
+                account = await Professional.findOne({ where: { email }});
+                detectedRole = 'fixer'
             }
 
-            if (!existingUser) return res.status(404).json({message: 'Usuario no encontrado'});
-        
-            // Verificar si la cuenta está bloqueada
-            if (existingUser.lockUntil && existingUser.lockUntil > new Date()) {
-            const minutes = Math.ceil((existingUser.lockUntil - new Date()) / 60000);
-            return res.status(403).json({ msg: `Cuenta bloqueada temporalmente. Intenta en ${minutes} minutos.` });
+            if (!account) {
+                return res.status(404).json({ message: "Usuario no encontrado" })
             }
 
-            // Comparar contraseñas
-            const validPassword = await bcrypt.compare(password, existingUser.password);
+            const validPassword = await bcrypt.compare(password, account.password)
 
-            //Si la contraseña es incorrecta
             if (!validPassword) {
-                // Incrementar intentos fallidos
-                existingUser.failedAttempts = (existingUser.failedAttempts || 0) + 1;
-
-                // Si supera 5 intentos, bloquear por 15 minutos
-                if (existingUser.failedAttempts >= 5) {
-                    existingUser.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+                account.failedAttempts = (account.failedAttempts || 0) + 1
+                if (account.failedAttempts >= 5) {
+                    account.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
                 }
-                return res.status(401).json({ msg: 'Contraseña incorrecta.' });
+                return res.status(401).json({ message: "Contraseña incorrecta" })
+            }
+
+            if (account.lockUntil && account.lockUntil > new Date()) {
+                const minutes = Math.ceil((account.lockUntil - new Date()) / 60000);
+                return res.status(403).json({ msg: `Cuenta bloqueada temporalmente. Intenta en ${minutes} minutos.` });
             }    
 
+            if (!account.is_verified) {
+                return res.status(403).json({ 
+                    message: "Debes verificar tu cuenta antes de iniciar sesión. Revisa tu correo." 
+                });
+            }
+
             // Resetear intentos y bloqueo si la contraseña es correcta
-            existingUser.failedAttempts = 0;
-            existingUser.lockUntil = null;
-            await existingUser.save();
+            account.failedAttempts = 0;
+            account.lockUntil = null;
+            await account.save();
 
-            // Generar token con el rol detectado
             const token = jwt.sign(
-            { id: existingUser.id, role },
-            process.env.JWT_SECRET,
-            { expiresIn: '2h' }
+                {
+                    id: account.id,
+                    role: detectedRole
+                }, 
+                process.env.JWT_SECRET, // <--- La llave maestra
+                { expiresIn: '8h' }
             );
-
-            // Determinar la redirección según el rol
-            const redirectUrl = role === 'user'
-                ? '/dashboard-user'
-                : '/api/auth/profile';
-
 
             res.status(200).json({
                 msg: 'Inicio de sesión exitoso.',
-                    user: {
-                        id: existingUser.id,
-                        name: existingUser.firstname,
-                        email: existingUser.email,
-                        role
-                    },
                 token,
-                redirectUrl
+                    user: {
+                        id: account.id,
+                        firstname: account.firstname,
+                        lastname: account.lastname,
+                        email: account.email,
+                        role: detectedRole
+                    },
             });
-                            
+
         } catch (error) {
             console.log(error);
-            return res.status(500).json({ message: error.message });
+            res.status(500).json({ message: "Error en el servidor" });
         }
+
+
+
+
+
+
+
+
+
+            //Buscar el email en ambas tablas
+            // let existingUser = await User.findOne({ where: { email }})
+            // let role = 'user';
+
+            // if (!existingUser) {
+            //     existingUser = await Professional.findOne({ where: { email }});
+            //     if (existingUser) {
+            //         role = existingUser.role;
+            //     }
+            // }
+            // if (existingUser.is_verified === false ) {
+            //     return res.status(403).json({ message: "Debes verificar tu cuenta antes de iniciar sesión"})
+            // }
+            // if (!existingUser) return res.status(404).json({message: 'Usuario no encontrado'});
+        
+            // Verificar si la cuenta está bloqueada
+            // if (existingUser.lockUntil && existingUser.lockUntil > new Date()) {
+            // const minutes = Math.ceil((existingUser.lockUntil - new Date()) / 60000);
+            // return res.status(403).json({ msg: `Cuenta bloqueada temporalmente. Intenta en ${minutes} minutos.` });
+            // }
+
+            // Comparar contraseñas
+            // const validPassword = await bcrypt.compare(password, existingUser.password);
+
+        //     //Si la contraseña es incorrecta
+        //     if (!validPassword) {
+        //         // Incrementar intentos fallidos
+        //         existingUser.failedAttempts = (existingUser.failedAttempts || 0) + 1;
+
+        //         // Si supera 5 intentos, bloquear por 15 minutos
+        //         if (existingUser.failedAttempts >= 5) {
+        //             existingUser.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+        //         }
+        //         return res.status(401).json({ msg: 'Contraseña incorrecta.' });
+        //     }    
+
+        //     // Resetear intentos y bloqueo si la contraseña es correcta
+        //     existingUser.failedAttempts = 0;
+        //     existingUser.lockUntil = null;
+        //     await existingUser.save();
+
+        //     // Generar token con el rol detectado
+        //     const token = jwt.sign(
+        //     { id: existingUser.id, role },
+        //     process.env.JWT_SECRET,
+        //     { expiresIn: '2h' }
+        //     );
+
+        //     // Determinar la redirección según el rol
+        //     const redirectUrl = role === 'user'
+        //         ? '/dashboard-user'
+        //         : '/api/auth/profile';
+
+
+        //     res.status(200).json({
+        //         msg: 'Inicio de sesión exitoso.',
+        //             user: {
+        //                 id: existingUser.id,
+        //                 firstname: existingUser.firstname,
+        //                 lastname: existingUser.lastname,
+        //                 email: existingUser.email,
+        //                 role
+        //             },
+        //         token,
+        //         redirectUrl
+        //     });
+                            
+        // } catch (error) {
+        //     console.log(error);
+        //     return res.status(500).json({ message: error.message });
+        // }
     } 
 
     exports.logout = async(req, res) => {

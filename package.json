@@ -1,1 +1,25 @@
-{}
+{
+  "name": "craftconnect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "start:front": "cd frontend && npm run dev",
+    "start:back": "cd backend && npm start",
+    "dev": "concurrently --name \"FRONT,BACK\" --prefix-colors \"blue,magenta\" \"npm run start:front\" \"npm run start:back\""
+    },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/aifpa/craftconnect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/aifpa/craftconnect/issues"
+  },
+  "homepage": "https://gitlab.com/aifpa/craftconnect#readme"
+}

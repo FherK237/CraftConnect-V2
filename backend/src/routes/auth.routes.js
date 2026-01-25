@@ -50,31 +50,34 @@ const { User, Professional } = require('../models/index');
         });
     });
 
-    router.get('/verify', async (req, res) => {
-        try {
-            const { token } = req.query;
-            console.log("Token recibido en /verify:", token); // <-- VERIFICA qué llega
+    router.get('/verify/:token', AuthController.verifyAccount
+        
+    //     async (req, res) => {
+    //     try {
+    //         const { token } = req.query;
+    //         console.log("Token recibido en /verify:", token); // <-- VERIFICA qué llega
 
-            if (!token) return res.status(400).json({ message: 'Token requerido' });
+    //         if (!token) return res.status(400).json({ message: 'Token requerido' });
 
-            const decoded = jwt.verify(decodeURIComponent(token), process.env.JWT_SECRET); // <- decodificar aquí
-            const email = decoded.email.toLowerCase();
-            let [updatedRows] = await User.update({ is_verified: true }, { where: { email } });
-            if (updatedRows === 0) {
-                [updatedRows] = await Professional.update({ is_verified: true }, { where: { email } });
-            }
-            if (updatedRows === 0) return res.status(404).json({ message: 'Usuario no encontrado.' });
+    //         const decoded = jwt.verify(decodeURIComponent(token), process.env.JWT_SECRET); // <- decodificar aquí
+    //         const email = decoded.email.toLowerCase();
+    //         let [updatedRows] = await User.update({ is_verified: true }, { where: { email } });
+    //         if (updatedRows === 0) {
+    //             [updatedRows] = await Professional.update({ is_verified: true }, { where: { email } });
+    //         }
+    //         if (updatedRows === 0) return res.status(404).json({ message: 'Usuario no encontrado.' });
 
-            return res.json({ message: 'Cuenta verificada correctamente. Ya puedes iniciar sesión.' });
+    //         return res.json({ message: 'Cuenta verificada correctamente. Ya puedes iniciar sesión.' });
 
-        } catch (error) {
-            console.log("Error en /verify:", error); // <-- imprime el error
-            if (error.name === 'TokenExpiredError') {
-                return res.status(400).json({ message: 'El enlace ha expirado.' });
-            }
-            return res.status(400).json({ message: 'Enlace inválido.' });
-        }
-    });
+    //     } catch (error) {
+    //         console.log("Error en /verify:", error); // <-- imprime el error
+    //         if (error.name === 'TokenExpiredError') {
+    //             return res.status(400).json({ message: 'El enlace ha expirado.' });
+    //         }
+    //         return res.status(400).json({ message: 'Enlace inválido.' });
+    //     }
+    // }
+);
 
     //Solicitud de restablecimiento (se envia el email)
     router.post('/forgot-password', AuthController.forgotPassword);
