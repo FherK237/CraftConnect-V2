@@ -12,6 +12,8 @@ import MessagePage from "../pages/MessagePage";
 import FixerDashPage from "../pages/FixerDashPage";
 import IsVerifiedPage from "../pages/IsVerifiedPage";
 import EmailSent from "../components/ui/EmailSent";
+import FixerProfileEditor from "../pages/fixer/FixerProfileEditor";
+import DashboardLayout from "../components/layout/DashboardLayout";
 
 function AppRoutes() {
     return (
@@ -21,17 +23,26 @@ function AppRoutes() {
                 <Route element={<Layout/> } >
                     <Route path="/" element={<HomePage/>}/>
                     <Route path="/home" element={<HomePage/> } />
-                    <Route path="/profile" element={<ProfilePage/>} />
+                    <Route path="/prof" element={<ProfilePage/>} />
+                    
                     <Route path="/search" element={<SearchPage/>} />
                     <Route path="/notifications" element={<NotifPage/>} />
                     <Route path="/messages" element={<MessagePage/>} />
                     <Route path="/fixer-dashboard" element={<FixerDashPage/>} />
                     <Route path="/verify/:token" element={<IsVerifiedPage/>}/>
                     <Route path="email-sent" element={<EmailSent/>}/>
+                    <Route path="/fixer" element={<DashboardLayout/>}>
+                        <Route path="profile" element={<FixerProfileEditor/>}/>
+                    </Route>
+                    
                 </Route>
-
+                
+                    
+                
                 <Route path="/login" element={<LoginPage/> } />
                 <Route path="/register" element={<RegisterPage/>}/>
+
+                
                 
 
                 {/*Ruta 404 */}

@@ -11,9 +11,9 @@ const { user, isAuthenticated } = useAuth()
 
     return (
         <>
-            <section style={{ textAlign: 'center', padding: '40px 20px', background: '#e9ecef' }}>
+            <section style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--card-bg' }}>
                 <h1 className="logo-text">CraftConnect</h1>
-                <p style={{ fontSize: '1.2rem', color: '#555' }}>
+                <p style={{ fontSize: '1.2rem', color: 'var(--navbar-text)' }}>
                 Conectando manos expertas con soluciones reales.
                 </p>
             </section>

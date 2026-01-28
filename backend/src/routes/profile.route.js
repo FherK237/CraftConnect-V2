@@ -5,7 +5,7 @@ const checkRole = require('../middlewares/checkRole');
 const { body } = require('express-validator');
 const multer = require('multer');
 
-    const upload = multer({dest: 'src/uploads/profiles'});
+const upload = require('../middlewares/uploadMiddleware')
 
     const router = Router();
 
@@ -13,7 +13,7 @@ const multer = require('multer');
         router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
 
         // Ruta GET para mostrar el formulario y datos del profesional
-        router.get('/fixer', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
+        router.get('/fixer', verifyToken, checkRole(['fixer']), ProfileController.formConfigureProfessional);
         
         // Ruta PUT de Personalizacion/Configuracion del usuario
         router.put('/configure-user',
@@ -29,13 +29,13 @@ const multer = require('multer');
         
         // Ruta PUT de Personalizacion/Configuracion de profesional
         router.put('/configure-fixer',
-            upload.single('picture'),
+            verifyToken, 
+            checkRole(['fixer']), 
+            upload.single('image_user'),
             [
                 body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
                 body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
             ], 
-            verifyToken, 
-            checkRole(['professional']), 
             ProfileController.ConfigureProfessional
         );
 

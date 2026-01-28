@@ -20,7 +20,7 @@ function CategoriasCarrusel() {
             <div className="categories-scroll">
                 {categorias.map((cat) => (
                     <div key={cat.id} className="category-card">
-                        {/* <div className="category-icon">{cat.icon}</div> */}
+                        <div className="category-icon">{cat.icon}</div>
                         <span className="category-name">{cat.name}</span>
                     </div>
                 ))}

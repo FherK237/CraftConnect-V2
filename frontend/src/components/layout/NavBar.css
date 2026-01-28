@@ -29,7 +29,7 @@
 }
 
 .nav-link {
-  color: #242f56;
+  color: var(--navbar-text);
   text-decoration: none;
   transition: color, transform 0.3s ease;
 }
@@ -40,7 +40,7 @@
 }
 
 .btn-logout {
-  background-color: #d9534f;
+  background-color: var(--btn-logout);
   color: white;
   border: none;
   padding: 8px 15px;

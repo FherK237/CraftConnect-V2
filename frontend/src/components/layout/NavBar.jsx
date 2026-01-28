@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import './NavBar.css'
+import { useTheme } from "../../context/ThemeContext"
 
 const NavBar = () => {
-
+    const {theme, toggleTheme } = useTheme()
     const { user, isAuthenticated, logout} = useAuth()
     const navigate = useNavigate()
 
@@ -13,12 +14,24 @@ const NavBar = () => {
     }
 
     return (
-        <nav className="navbar">
+        <nav className="navbar" style={{ backgroundColor: 'var(--navbar-bg)' }}>
             <Link to="/home" className="navbar-brand">
                 <img src="CC-logo-v2.png" alt="" className="logo-craft"/>
             </Link>
-
             <div className="navbar-links">
+            <button 
+                onClick={toggleTheme} 
+                style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontSize: '1.2rem',
+                    padding: '5px'
+                }}
+                title="Cambiar tema"
+                >
+                {theme === 'light' ? '🌙' : '☀️'}
+            </button>
                 {isAuthenticated ? (
                     <>
                         
@@ -30,9 +43,10 @@ const NavBar = () => {
                         <label> | </label>
                         <Link to="/notifications" className="nav-link">Notificaciones</Link>
                         <label> | </label>
-                        <Link to="/profile" className="nav-link">Perfil</Link>
+                        {/* <Link to={user.role === 'user' ? '/user' : '/fixer'} className="nav-link">Perfil</Link> verificar funcionamientp */}
+                        <Link to='/fixer' className="nav-link">Perfil</Link>
                         <label> | </label>
-                        <span style={{ color: 'black' }}>
+                        <span style={{ color: 'var(--navbar-text)' }}>
                             Hola, {user?.firstname}
                         </span>
                         

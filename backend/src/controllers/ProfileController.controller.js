@@ -78,26 +78,33 @@ const { User, Professional } = require('../models/index');
                     firstname, lastname, phone, 
                     birth_date, company_name, description, 
                     experience_years, latitude, longitude, job_id 
-                } = req.body;
-            const picture = saveFile(req.file, 'profiles/image_user');
+            } = req.body;
+            
+            let picturePath = null;
+
+            if (req.file) {
+                picturePath = req.file.path.replace(/\\/g, "/")
+            }
 
             if ( !firstname || !lastname ) {
-                    return res.status(400).json({ message: 'Todos los campos son obligatorios.'})
+                return res.status(400).json({ message: 'Todos los campos son obligatorios.'})
             }
 
             const dataUpdate = {
-                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id, ...(picture && { picture }),
+                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id, ...(picturePath && { picture: picturePath }),
             }
 
-            const result = await Professional.update(dataUpdate, { where: { id }});
+            const [updatedRows] = await Professional.update(dataUpdate, { where: { id }});
 
-            if (!result || (Array.isArray(result) && result[0] === 0)) return res.status(404).json({ message: 'Profesional no encontrado o sin cambios' });
+            if (updatedRows === 0) {
+                return res.status(200).json({ message: 'Datos guardados (Sin cambios detectados).' });
+            }
 
             return res.status(200).json({ message: 'Perfil profesional actualizado correctamente.' });
 
             } catch (error) {
                 console.log(error);
-                return res.status(400).json({ message: error.message });
+                return res.status(500).json({ message: "Error interno del servidor" });
             } 
     }
 
