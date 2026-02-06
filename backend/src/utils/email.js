@@ -68,14 +68,14 @@ El Equipo de CrafterConnect
 //funcion para la recuperacion de contraseña
 exports.sendResetPasswordEmail = async (email, link) => {
     const mailOptions = {
-        from: '"CrafterConnect" <no-reply@crafterconnect.com>',
+        from: '"CraftConnect" <no-reply@craftconnect.com>',
         to: email,
         subject: 'Recuperacion de credenciales',
         html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; border: 1px solid #dddddd; border-radius: 8px; overflow: hidden;">
                 
                 <div style="background-color: #007bff; color: #ffffff; padding: 20px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 24px;">CrafterConnect</h1>
+                    <h1 style="margin: 0; font-size: 24px;">CraftConnect</h1>
                 </div>
 
                 <div style="padding: 30px;">
@@ -103,7 +103,7 @@ exports.sendResetPasswordEmail = async (email, link) => {
                 </div>
 
                 <div style="background-color: #f8f8f8; padding: 15px; text-align: center; font-size: 12px; color: #aaaaaa;">
-                    <p>Este es un mensaje automático de CrafterConnect. Por favor, no respondas a este correo.</p>
+                    <p>Este es un mensaje automático de CraftConnect. Por favor, no respondas a este correo.</p>
                 </div>
             </div>
         `

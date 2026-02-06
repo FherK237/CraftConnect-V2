@@ -15,6 +15,7 @@ function IsVerifiedPage() {
             return
         }
 //asdasdad
+
         const verifyAccount = async () => {
             try {
                 await api.get(`/auth/verify/${token}`)

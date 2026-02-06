@@ -1,4 +1,6 @@
+
 const express = require('express');
+const cors = require('cors')
 const morgan = require('morgan');
 
 const http = require('http');
@@ -12,6 +14,11 @@ require('dotenv').config();
 
 //Initializacion
 const app = express();
+
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 
 //servidor nativo http
 const server = http.createServer(app);
@@ -28,9 +35,13 @@ const io = new Server(server, {
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 //Routes
 
+    const api = require('./routes/index.routes');
+    app.use('/api', api);
+    
     app.get('/dashboard-user', (req, res) => {
         res.send('Bienvenido usuario :)');
     });
@@ -48,8 +59,7 @@ app.use(express.urlencoded({ extended: true }));
         }
     });
 
-    const api = require('./routes/index.routes');
-    app.use('/api', api);
+    
 
 //Public Files
 
