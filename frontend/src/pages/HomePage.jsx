@@ -2,8 +2,6 @@ import CategoriasCarrusel from "../components/ui/CategoriasCarrusel"
 import FixerCarrusel from "../components/ui/FixerCarrusel"
 import { useAuth } from "../context/AuthContext"
 import { Link } from "react-router-dom"
-import './HomePage.css'
-
 
 function HomePage() {
 

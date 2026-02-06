@@ -5,3 +5,10 @@ backend/node_modules/
 
 # --- Seguridad (CRÍTICO) ---
 .env
+=======
+# Directorios
+frontend/node_modules
+backend/node_modules
+/node_modules
+
+**/.env
