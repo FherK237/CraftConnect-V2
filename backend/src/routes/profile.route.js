@@ -13,30 +13,21 @@ const upload = require('../middlewares/uploadMiddleware')
         router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
 
         // Ruta GET para mostrar el formulario y datos del profesional
-        router.get('/fixer', verifyToken, checkRole(['fixer']), ProfileController.formConfigureProfessional);
+        router.get('/me', verifyToken, checkRole(['fixer']), ProfileController.formConfigureFixer);
         
         // Ruta PUT de Personalizacion/Configuracion del usuario
         router.put('/configure-user',
-            upload.single('picture'), 
-            [
-                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-                body('lastname').notEmpty().withMessage('Los apeliidos no pueden ser vacios.'),
-            ], 
+            upload.single('image_user'),  
             verifyToken, 
             checkRole(['user']), 
             ProfileController.ConfigureUser,
         );
         
-        // Ruta PUT de Personalizacion/Configuracion de profesional
-        router.put('/configure-fixer',
-            verifyToken, 
-            checkRole(['fixer']), 
+        // Ruta PUT de Personalizacion/Configuracion de fixer
+        router.put('/f-update',
+            verifyToken,
             upload.single('image_user'),
-            [
-                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-                body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
-            ], 
-            ProfileController.ConfigureProfessional
+            ProfileController.ConfigureFixer
         );
 
 //RUTA PUT para subir INE
@@ -46,8 +37,8 @@ const upload = require('../middlewares/uploadMiddleware')
                 { name: 'image_ine_back', maxCount: 1}
             ]),
             verifyToken,
-            checkRole(['professional']),
-            ProfileController.IneProfessional
+            checkRole(['fixer']),
+            ProfileController.IneFixer
         );
 
         module.exports = router;

@@ -14,6 +14,7 @@ import IsVerifiedPage from "../pages/IsVerifiedPage";
 import EmailSent from "../components/ui/EmailSent";
 import FixerProfileEditor from "../pages/fixer/FixerProfileEditor";
 import DashboardLayout from "../components/layout/DashboardLayout";
+import FixerPublicProfile from "../pages/public/FixerPublicProfile";
 
 function AppRoutes() {
     return (
@@ -35,6 +36,7 @@ function AppRoutes() {
                         <Route path="profile" element={<FixerProfileEditor/>}/>
                     </Route>
                     
+                    <Route path="/fixers/:id" element={<FixerPublicProfile/>}/>
                 </Route>
                 
                     

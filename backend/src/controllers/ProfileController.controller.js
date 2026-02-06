@@ -16,7 +16,8 @@ const { User, Professional } = require('../models/index');
         }
     }
 
-    exports.formConfigureProfessional = async(req, res) => {
+    // VISUALIZAR INFORMACION DE FIXER
+    exports.formConfigureFixer = async(req, res) => {
         try {
             const { id } = req.user;
             const professional = await Professional.findByPk(id, {
@@ -24,7 +25,10 @@ const { User, Professional } = require('../models/index');
             });
             const jobs = await Job.findAll();
 
-            res.json({professional: professional, jobs: jobs});
+            res.json({
+                professional,
+                jobs
+            });
 
         } catch (error) {
             console.log(error);
@@ -32,8 +36,11 @@ const { User, Professional } = require('../models/index');
         }
     }
 
-    exports.ConfigureUser = async(req, res) => {
+    exports.ConfigureUser = async (req, res) => {
         try {
+            console.log("🔥 PETICIÓN RECIBIDA EN UPDATE");
+            console.log("Body (Texto):", req.body);
+            console.log("File (Imagen):", req.file);
             //Validar campos
             const errors = validationResult(req);
                 if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -66,7 +73,7 @@ const { User, Professional } = require('../models/index');
         }
     }
 
-    exports.ConfigureProfessional = async(req, res) => {
+    exports.ConfigureFixer = async(req, res) => {
         try {
             
             //Validar campos
@@ -80,6 +87,15 @@ const { User, Professional } = require('../models/index');
                     experience_years, latitude, longitude, job_id 
             } = req.body;
             
+            let cleanJobId = job_id;
+            if (!job_id || job_id === "" || job_id === "null" || job_id === "undefined") {
+                cleanJobId = null; 
+            }
+
+            if (!cleanJobId) {
+                return res.status(400).json({ message: "Debes seleccionar un oficio válido." });
+            }
+
             let picturePath = null;
 
             if (req.file) {
@@ -91,7 +107,9 @@ const { User, Professional } = require('../models/index');
             }
 
             const dataUpdate = {
-                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id, ...(picturePath && { picture: picturePath }),
+                firstname, lastname, phone, birth_date, company_name, description, experience_years, latitude, longitude, job_id: cleanJobId,
+            
+            ...(picturePath && { picture: picturePath }),
             }
 
             const [updatedRows] = await Professional.update(dataUpdate, { where: { id }});
@@ -108,7 +126,7 @@ const { User, Professional } = require('../models/index');
             } 
     }
 
-    exports.IneProfessional = async(req, res) => {
+    exports.IneFixer = async(req, res) => {
         try {
             const { id } = req.user;
             const { image_ine_front, image_ine_back } = saveFileProfessional(req.files);
@@ -128,9 +146,9 @@ const { User, Professional } = require('../models/index');
 
 
     module.exports = {
-        formConfigureUser:         this.formConfigureUser,
-        formConfigureProfessional: this.formConfigureProfessional,
-        ConfigureUser:             this.ConfigureUser,
-        ConfigureProfessional:     this.ConfigureProfessional,
-        IneProfessional:           this.IneProfessional
+        formConfigureUser:      this.formConfigureUser,
+        formConfigureFixer:     this.formConfigureFixer,
+        ConfigureUser:          this.ConfigureUser,
+        ConfigureFixer:         this.ConfigureFixer,
+        IneFixer:               this.IneFixer
     }

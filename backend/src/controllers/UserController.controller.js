@@ -128,20 +128,27 @@ exports.getFixerProfilePublic = async (req, res) => {
     try {
         console.log("Visualizar el perfil de un Fixer en especifico.");
 
-        const fixerId = req.params.id;
+        const { id } = req.params
 
-        const fixerProfile =  await Professional.findByPk( fixerId, {
-            attributes: {
-                exclude: ['password', 'failedAttempts', 'lockUntil', 'verification_token', 'image_ine_front', 'image_ine_back', 'resetToken', 'resetTokenExpiry', 'role', 'status']
-            }
-        });
+        const fixerProfile =  await Professional.findByPk( id, {
+        attributes: [
+            'id', 'firstname', 'lastname', 'picture', 
+            'description', 'experience_years', // (Si tienes rating)
+            'is_verified', 'latitude', 'longitude' // Para el mapa futuro
+            // OJO: No devolvemos 'phone' ni 'email' si quieres que primero contraten
+        ],
+        include: [{
+            model: Job, // Importar modelo job
+            as: 'job',
+            attributes: ['title'] // nombre del oficio
+        }]
+    });
 
-        if (!fixerProfile) {
-            return res.status(404).json({ message: "Fixer no encontrado."});
-        }
+    if (!fixerProfile) {
+        return res.status(404).json({ message: "Fixer no encontrado."});
+    }
 
         return res.status(200).json({ 
-            message: "Obteniendo informacion de Fixer.",
             profile: fixerProfile
         });
 
