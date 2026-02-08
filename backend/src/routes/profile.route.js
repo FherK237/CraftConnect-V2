@@ -5,7 +5,7 @@ const checkRole = require('../middlewares/checkRole');
 const { body } = require('express-validator');
 const multer = require('multer');
 
-    const upload = multer({dest: 'src/uploads/profiles'});
+const upload = require('../middlewares/uploadMiddleware')
 
     const router = Router();
 
@@ -13,30 +13,21 @@ const multer = require('multer');
         router.get('/user', verifyToken, checkRole(['user']), ProfileController.formConfigureUser);
 
         // Ruta GET para mostrar el formulario y datos del profesional
-        router.get('/fixer', verifyToken, checkRole(['professional']), ProfileController.formConfigureProfessional);
+        router.get('/me', verifyToken, checkRole(['fixer']), ProfileController.formConfigureFixer);
         
         // Ruta PUT de Personalizacion/Configuracion del usuario
         router.put('/configure-user',
-            upload.single('picture'), 
-            [
-                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-                body('lastname').notEmpty().withMessage('Los apeliidos no pueden ser vacios.'),
-            ], 
+            upload.single('image_user'),  
             verifyToken, 
             checkRole(['user']), 
             ProfileController.ConfigureUser,
         );
         
-        // Ruta PUT de Personalizacion/Configuracion de profesional
-        router.put('/configure-fixer',
-            upload.single('picture'),
-            [
-                body('firstname').notEmpty().withMessage('El nombre no puede ser vacío.'),
-                body('lastname').notEmpty().withMessage('Los Apellidos no puede ser vacios.')
-            ], 
-            verifyToken, 
-            checkRole(['professional']), 
-            ProfileController.ConfigureProfessional
+        // Ruta PUT de Personalizacion/Configuracion de fixer
+        router.put('/f-update',
+            verifyToken,
+            upload.single('image_user'),
+            ProfileController.ConfigureFixer
         );
 
 //RUTA PUT para subir INE
@@ -46,8 +37,8 @@ const multer = require('multer');
                 { name: 'image_ine_back', maxCount: 1}
             ]),
             verifyToken,
-            checkRole(['professional']),
-            ProfileController.IneProfessional
+            checkRole(['fixer']),
+            ProfileController.IneFixer
         );
 
         module.exports = router;

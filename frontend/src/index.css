@@ -1,0 +1,34 @@
+/* 1. COLORES POR DEFECTO (MODO CLARO) */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --card-bg: #e9ecef;
+  --navbar-bg: #e9e9e9; /* El navbar suele ser oscuro siempre, o puedes cambiarlo */
+  --navbar-text: #242f56;
+  --border-color: #ddd;
+  --btn-logout: #d9534f;
+  --primary-color: #003366;
+  --terceary-color: #f0f0f0;
+}
+
+/* 2. SOBREESCRIBIMOS PARA MODO OSCURO */
+body.dark-mode {
+  --bg-color: #121212;        /* Negro suave */
+  --text-color: #e0e0e0;      /* Blanco suave */
+  --card-bg: #1e1e1e;         /* Gris oscuro para tarjetas */
+  --navbar-bg: #000000;
+  --border-color: #333;
+  --navbar-text: #c1ceff;
+  --btn-logout: #a5241d;
+  --primary-color: #0080ff;
+  --terceary-color: #333;
+}
+
+/* 3. APLICAMOS LAS VARIABLES AL BODY */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s; /* Transición suave */
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
