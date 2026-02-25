@@ -1,7 +1,7 @@
 function InputGroup({ label, type, name, value, onChange, placeholder}) {
     return (
-        <div>
-            <label>
+        <div style={{ marginBottom: '1px' }}>
+            <label className="custom-label">
                 {label}
             </label>
             <input
@@ -10,6 +10,7 @@ function InputGroup({ label, type, name, value, onChange, placeholder}) {
             value={value}
             onChange={onChange}
             placeholder={placeholder}
+            className="custom-input"
             />
         </div>
     )

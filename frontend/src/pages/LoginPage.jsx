@@ -4,8 +4,9 @@ import { useAuth } from "../context/AuthContext"
 import { loginUser } from '../services/auth.service'
 import InputGroup from '../components/ui/InputGroup'
 import InputPass from "../components/ui/InputPass"
-import './LoginPage.css'
 import Footer from "../components/layout/Footer"
+import logoCraft from '../assets/CC-logo-v2.png'
+import './LoginPage.css'
 
 function LoginPage() {
     const [ formDataL, setFormDataL ] = useState({
@@ -52,18 +53,18 @@ function LoginPage() {
     }
 
     return (
-        <>
-            <div className="navbar">
-                <Link to="/home" className="navbar-brand">
-                    <img src="CC-logo-v2.png" alt="" className="logo-craftt"/>
-                </Link>
-            </div>
+        <div className="login-page-wrapper">
+            <div className="login-card" >
+                <div className="login-header" style={{ marginBottom: '20px' }}>
+                    <Link to="/home">
+                        <img src={logoCraft} alt="" className="login-logo"/>
+                    </Link>
+                    <h2 className="login-title">Inicar Sesión</h2>
+                    <p className="login-subtitle">¡Qué bueno verte de nuevo!</p>
+                </div>
 
-            <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-                
-                <h2 style={{ textAlign: 'center' }}>Inicar Sesión</h2>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="login-form">
                     <InputGroup 
                         label="Correo Electrónico"
                         type="email"
@@ -83,26 +84,24 @@ function LoginPage() {
                         
                         type2="button"
                         onClick={togglePassVisibility}
-                        button={showPass ? 'Ocultar' : 'Mostrar'}
+                        button={showPass ? 'visibility_off' : 'visibility'}
                     />
 
                     <button
                     type="submit"
-                    style={{ marginTop: '10px', padding: '10px', width: '100%' }}
+                    className="btn-submit-login"
                     >
                         Entrar
                     </button>
                 </form>
-                <p>
+                <p className="login-footer-text">
                     ¿Aún no tienes cuenta? {""}
-                    <Link to='/register'>
+                    <Link to='/register' className="login-link">
                         Registrarse
                     </Link>
                 </p>
             </div>
-            <Footer/>
-        
-        </>
+        </div>
         
     )
 }

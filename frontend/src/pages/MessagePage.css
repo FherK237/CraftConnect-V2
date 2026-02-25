@@ -1,0 +1,255 @@
+/* Messages.css */
+
+.messages-page-wrapper {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f3f4f6;
+    padding-top: 80px; /* Espacio para el NavBar flotante */
+    box-sizing: border-box;
+}
+
+.chat-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    max-width: 1200px;
+    width: 95%;
+    margin: 0 auto 20px auto;
+    flex-grow: 1;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Evita que el scroll se salga de la tarjeta */
+}
+
+/* --- COLUMNA IZQUIERDA (Contactos) --- */
+.chat-sidebar {
+    background-color: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #ffffff;
+}
+
+.chat-sidebar-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #111827;
+}
+
+.contact-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s;
+}
+
+.contact-item:hover {
+    background-color: #f3f4f6;
+}
+
+.contact-item.active {
+    background-color: #eff6ff;
+    border-right: 3px solid #2563eb;
+}
+
+.contact-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.contact-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contact-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+/* --- COLUMNA DERECHA (Chat) --- */
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+.chat-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+}
+
+.chat-header-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #111827;
+}
+
+.chat-status {
+    font-size: 0.8rem;
+    color: #10b981; /* Verde */
+}
+
+/* Área donde viven las burbujas */
+.chat-messages-area {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Burbujas de chat */
+.message-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.message-wrapper.mine {
+    justify-content: flex-end; /* A la derecha */
+}
+
+.message-wrapper.theirs {
+    justify-content: flex-start; /* A la izquierda */
+}
+
+.message-bubble {
+    max-width: 60%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.mine .message-bubble {
+    background-color: #2563eb; /* Azul corporativo */
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.theirs .message-bubble {
+    background-color: #ffffff;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    border-bottom-left-radius: 2px;
+}
+
+.message-bubble p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.message-time {
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 5px;
+    text-align: right;
+    color: inherit;
+    opacity: 0.8;
+}
+
+/* Input inferior */
+.chat-input-area {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    background-color: #ffffff;
+}
+
+.chat-form {
+    display: flex;
+    gap: 15px;
+}
+
+.chat-input {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chat-input:focus {
+    border-color: #2563eb;
+}
+
+.btn-send-message {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.btn-send-message:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-send-message:active {
+    transform: scale(0.95);
+}
+
+/* Estado Vacío (Cuando entras y no seleccionas a nadie) */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7280;
+}
+
+.empty-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    color: #d1d5db;
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 768px) {
+    .chat-container {
+        grid-template-columns: 1fr; /* Una sola columna en celular */
+        width: 100%;
+        margin-bottom: 0;
+        border-radius: 0;
+    }
+    
+    /* Nota: Para un diseño móvil avanzado, tendrías que ocultar el sidebar
+       cuando un chat se activa, pero para esta fase, puedes dejar que 
+       se apilen uno sobre otro si prefieres. */
+}

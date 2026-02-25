@@ -1,0 +1,215 @@
+/* FixerList.css */
+
+.search-page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f9fafb; /* Fondo clarito para que resalten las tarjetas blancas */
+}
+
+/* --- SECCIÓN DE BÚSQUEDA (El Header gris oscuro/azulado) --- */
+.search-header-section {
+    background-color: #111827;
+    padding: 120px 20px 60px 20px; /* Mucho padding arriba por si tu NavBar es fixed */
+    color: white;
+    text-align: center;
+}
+
+.search-header-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.search-main-title {
+    font-size: 2.2rem;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.search-subtitle {
+    color: #9ca3af;
+    font-size: 1.1rem;
+    margin: 0 0 30px 0;
+}
+
+/* --- LA BARRA DE FORMULARIO --- */
+.search-form-bar {
+    display: flex;
+    gap: 15px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.search-input-group, 
+.search-select-group {
+    display: flex;
+    align-items: center;
+    background-color: #f3f4f6;
+    border-radius: 10px;
+    padding: 0 15px;
+    flex: 1; /* Ocupan espacio por igual */
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.search-input-group:focus-within,
+.search-select-group:focus-within {
+    border-color: #2563eb;
+    background-color: white;
+}
+
+.search-icon {
+    color: #6b7280;
+    margin-right: 10px;
+}
+
+.search-text-input, 
+.search-select-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 16px 0;
+    font-size: 1rem;
+    color: #111827;
+    outline: none;
+}
+
+/* Ocultar flecha nativa del select para un look más limpio */
+.search-select-input {
+    appearance: none;
+    cursor: pointer;
+}
+
+.btn-search-submit {
+    background-color: #2563eb; /* Azul confiable */
+    color: white;
+    border: none;
+    padding: 0 30px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-search-submit:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-search-submit:active {
+    transform: scale(0.96);
+}
+
+/* Botón limpiar filtros */
+.btn-clear-filters {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    margin-top: 15px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.2s;
+}
+
+.btn-clear-filters:hover {
+    color: white;
+}
+
+/* --- CONTENEDOR DE RESULTADOS --- */
+.search-results-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    flex-grow: 1; /* Empuja el footer hacia abajo */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.results-header h2 {
+    font-size: 1.5rem;
+    color: #111827;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* La cuadrícula de Fixers (Responsive automático y perfecto) */
+.fixers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* --- ESTADOS (Cargando, Error, Vacío) --- */
+.loading-state, 
+.error-state, 
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+    background: white;
+    border-radius: 16px;
+    border: 1px dashed #d1d5db;
+}
+
+.spinner {
+    font-size: 40px;
+    animation: spin 2s infinite linear;
+    color: #2563eb;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-icon {
+    font-size: 60px;
+    color: #d1d5db;
+    margin-bottom: 15px;
+}
+
+.empty-state h3 {
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+.btn-empty-clear {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-empty-clear:hover {
+    background-color: #e5e7eb;
+}
+
+/* --- RESPONSIVE PARA MÓVILES --- */
+@media (max-width: 768px) {
+    .search-form-bar {
+        flex-direction: column; /* Apila el input, select y botón */
+        background-color: transparent;
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .search-input-group,
+    .search-select-group {
+        background-color: white;
+    }
+
+    .btn-search-submit {
+        padding: 16px; /* Botón más gordo para tocar con el dedo */
+    }
+}

@@ -1,22 +1,31 @@
+import './InputPass.css';
 function InputPass({ label, type, name, value, onChange, placeholder, button, type2, onClick}) {
     return (
-        <div>
-            <label>
+        <div className="form-group">
+            <label className="custom-label">
                 {label}
             </label>
-            <input
-            type={type}
-            name={name}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            />
+            <div className="input-pass-wrapper">
+                <input
+                type={type}
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                className="custom-input input-with-icon"
+                />
             <button 
-                type={type2}
-                onClick={onClick}
+                type="button" 
+                onClick={onClick} 
+                className="btn-toggle-pass"
+                title={type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña'}
             >
-                {button}
+                <span className="material-icons-outlined" style={{color:'black'}}>{button}</span>
             </button>
+
+            </div>
+
+
         </div>
     )
 }

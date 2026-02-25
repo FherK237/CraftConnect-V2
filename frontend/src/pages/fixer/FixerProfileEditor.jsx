@@ -8,7 +8,6 @@ import api from '../../services/api'
 function FixerProfileEditor() {
   const [loading, setLoading] = useState(true)
   const [ jobsList, setJobsList] = useState([])
-
   const [formData, setFormData ] = useState({
     firstname: '',
     lastname: '',
@@ -28,10 +27,10 @@ function FixerProfileEditor() {
     const fetchProfile = async () => {
       try {
         const data = await getMyProfile()
-        setJobsList(data.jobs)
+        setJobsList(data.jobs || [])
 
         setFormData({
-          firstname: data.professional.firstname || 'asdsad',
+          firstname: data.professional.firstname || '',
           lastname: data.professional.lastname || '',
           phone: data.professional.phone || '',
           description: data.professional.description || '',
@@ -42,8 +41,6 @@ function FixerProfileEditor() {
         if (data.professional.picture) {
           setPreviewImage(`http://localhost:3001/${data.professional.picture}`);
         }
-
-        setLoading(false);
 
       } catch (error) {
         console.error("Error cargando perfil", error);
@@ -60,9 +57,21 @@ function FixerProfileEditor() {
   }
 
   const handleFileChange = (e) => {
-    setSelectedFile(
-      e.target.files[0]
-    )
+    const file = e.target.files[0]
+
+
+    if (file) {
+      const MAX_SIZE = 5 * 1024 * 1024
+
+      if (file.size > MAX_SIZE) {
+        alert("Esta foto es muy pesada. Por favor elige una menor a 5MB.")
+        e.target.value = ""
+        return 
+      }
+
+      setSelectedFile(file)
+      setPreviewImage(URL.createObjectURL(file)) //permite que se visualice la imagen seleccionada antes de darle en guardar//
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -94,52 +103,74 @@ function FixerProfileEditor() {
 
   return (
     <>
-    <div>
-      <div>
-        <h2>Editar mi informacion</h2>
-        <Link to={`/profile/${"me"}`}>
+    <div className="editor-container">
+      <div className="editor-header">
+        <h2 className="editor-title">Editar mi informacion</h2>
+        <Link to={`/profile/${"me"}`} className="btn-view-profile">
+        <span className="material-icons" style={{ fontSize: '18px' }}>visibility</span>
           Ver Perfil Público
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          {previewImage && (
-            <img src={previewImage} alt="Perfil"/>
-          )}
-          <br />
-          <input type="file" onChange={handleFileChange} />
+      <form onSubmit={handleSubmit} className="editor-form">
+        <div className="image-upload-section">
+          <div className="image-preview-wrapper">
+            {previewImage ? (
+              <img src={previewImage} alt="Perfil" className="image-preview"/>
+            ) : (
+              <div className="image-placeholder">
+                <span className="material-icons">person</span>
+              </div>
+            )}
+          </div>
+          <label className="file-input-label">
+            <span className="material-icons">photo_camera</span>
+              Cambiar Foto
+            <input type="file" onChange={handleFileChange} className="file-input-hidden" accept="image/*" />
+          </label>
         </div>
 
-        <div>
-        <InputGroup label='Nombre' name='firstname' value={formData.firstname} onChange={handleChange}/>
-        <InputGroup label='Apellido'name='lastname' value={formData.lastname} onChange={handleChange}/>
+
+        <div className="form-row">
+          <div className="form-group">
+            <InputGroup label='Nombre' name='firstname' value={formData.firstname} onChange={handleChange}/>
+          </div>
+          <div className="form-group">
+            <InputGroup label='Apellido'name='lastname' value={formData.lastname} onChange={handleChange}/>
+          </div>
         </div>
 
-        <InputGroup label='Numero Telefonico' name='phone' value={formData.phone} onChange={handleChange}/>
-
-        <div>
-          <label>¿Cuál es tu oficio?</label>
-          <select name="job_id" value={formData.job_id} onChange={handleChange}>
-            <option value="">Selecciona una especialidad</option>
-            {jobsList.map(job => (
-              <option key={job.id} value={job.id}>{job.title}</option>
-            ))}
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <InputGroup label='Número Telefónico' name='phone' value={formData.phone} onChange={handleChange}/>
+          </div>
+          <div className="form-group">
+            <label className="custom-label">¿Cuál es tu oficio?</label>
+            <div className="select-wrapper">
+              <select name="job_id" value={formData.job_id} onChange={handleChange} className="custom-input">
+                <option value="">Selecciona una especialidad</option>
+                {jobsList.map(job => (
+                  <option key={job.id} value={job.id}>{job.title}</option>
+                ))}
+              </select>
+              <span className="material-icons select-icon">expand_more</span>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label>Sobre mí Biografía</label>
+        <div className="form-group full-width">
+          <label className="custom-label">Sobre mí (Biografía)</label>
           <textarea 
             name="description" 
             value={formData.description} 
             onChange={handleChange}
             rows="4"
-            placeholder="Cuenta a tus clientes tu experiencia..."
+            className="custom-input custom-textarea"
+            placeholder="Cuenta a tus clientes tu experiencia, años de trabajo, y por qué deberían contratarte..."
           />
         </div>
 
-        <button type="submit">
+        <button type="submit" className="btn-submit-profile">
           Guardar Cambios
         </button>
       </form>

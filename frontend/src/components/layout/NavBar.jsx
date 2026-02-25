@@ -1,70 +1,113 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
-import './NavBar.css'
 import { useTheme } from "../../context/ThemeContext"
+import logoCraft from '../../assets/CC-logo-v2.png'
+import './NavBar.css'
+import { useState } from "react"
+
 
 const NavBar = () => {
     const {theme, toggleTheme } = useTheme()
     const { user, isAuthenticated, logout} = useAuth()
     const navigate = useNavigate()
 
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+    const toggleMobileMenu = () => {
+      setIsMobileMenuOpen(!isMobileMenuOpen)
+    }
+
+		const closeMenu = () => {
+			setIsMobileMenuOpen(false)
+		}
+
     const handleLogout = () => {
-        logout()
-        navigate('/login')
+      logout()
+      navigate('/login')
     }
 
     return (
-        <nav className="navbar" style={{ backgroundColor: 'var(--navbar-bg)' }}>
-            <Link to="/home" className="navbar-brand">
-                <img src="CC-logo-v2.png" alt="" className="logo-craft"/>
-            </Link>
-            <div className="navbar-links">
-            <button 
-                onClick={toggleTheme} 
-                style={{ 
-                    background: 'none', 
-                    border: 'none', 
-                    cursor: 'pointer', 
-                    fontSize: '1.2rem',
-                    padding: '5px'
-                }}
-                title="Cambiar tema"
-                >
-                {theme === 'light' ? '🌙' : '☀️'}
-            </button>
-                {isAuthenticated ? (
-                    <>
-                        
-                        <Link to="/home" className="nav-link">Home</Link>
-                        <label> | </label>
-                        <Link to="/search" className="nav-link">Buscar</Link>
-                        <label> | </label>
-                        <Link to="/messages" className="nav-link">Mensajes</Link>
-                        <label> | </label>
-                        <Link to="/notifications" className="nav-link">Notificaciones</Link>
-                        <label> | </label>
-                        {/* <Link to={user.role === 'user' ? '/user' : '/fixer'} className="nav-link">Perfil</Link> verificar funcionamientp */}
-                        <Link to='/fixer' className="nav-link">Perfil</Link>
-                        <label> | </label>
-                        <span style={{ color: 'var(--navbar-text)' }}>
-                            Hola, {user?.firstname}
-                        </span>
-                        
-                        <button onClick={handleLogout} className="btn-logout">
-                            Cerrar Sesión
-                        </button>
-                    </>
-                ): (
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                        <Link to='/search' className="nav-link">Buscar</Link>
-                        <label> | </label>
-                        <Link to="/login" className="nav-link" style={{ color: '#008fcc', fontWeight: 'bold' }}>Iniciar Sesión</Link>
-                        <label> | </label>
-                        <Link to="/register" className="nav-link" style={{ color: '#3565af', fontWeight: 'bold' }}>Registrarse</Link>
-                    </div>
-                )}
+      <nav className="navbar">
+        {/* LOGO*/}
+        <Link to="/home" className="navbar-brand" onClick={closeMenu}>
+          <img src={logoCraft} alt="Logo CraftConnect" className="logo-craft" />
+        </Link>
+
+        {/* EMENU ESCRITORIO */}
+        <div className="nav-menu">
+          {isAuthenticated ? (
+          <>  
+            <Link to='/search' className="nav-link">Buscar</Link>
+              {/* <Link to={user?.role === 'user' ? '/user' : '/fixer'} className="nav-link">Ir ahora</Link> */}
+            <Link to={user?.role === 'user' ? '/profile' : '/profile'} className="nav-link">Ir ahora</Link>
+          </>
+          ) : (
+            <Link to="/search" className="nav-link">Buscar Profesionales</Link>
+          )}
+        </div>
+            {/* CONTROLES Y SESION*/}
+        <div className="nav-controls">
+            
+          <button onClick={toggleTheme} className="btn-theme-toggle" title="Cambiar tema">
+            <span className="material-icons-outlined">
+              {theme === 'light' ? 'dark_mode' : 'light_mode'}
+            </span>
+          </button>
+
+          {/* Área de Usuario */}
+          {isAuthenticated ? (
+            <div className="user-area">
+              <span className="user-greeting">Hola, {user?.firstname}</span>
+              <button onClick={handleLogout} className="btn-logout">Cerrar Sesión</button>
             </div>
-        </nav>
+          ) : (
+            <div className="guest-area">
+              <Link to="/login" className="nav-link btn-login-text">Iniciar Sesión</Link>
+              <Link to="/register" className="btn-register-solid">Registrarse</Link>
+            </div>
+          )}
+
+					{/* BOTN HAMBURGUESA PARA MOVIL */}
+					<button className="btn-hamburger" onClick={toggleMobileMenu}>
+						<span className="material-icons-outlined">
+							{isMobileMenuOpen ? 'close' : 'menu'}
+						</span>
+					</button>
+        </div>
+
+        <div className={`mobile-dropdown ${isMobileMenuOpen ? 'show' : ''}`}>
+          {isAuthenticated ? (
+            <>
+              <Link to="/search" className="nav-link-mobile" onClick={closeMenu}>
+                <span className="material-icons-outlined">search</span> Buscar
+              </Link>
+              <button onClick={handleLogout} className="nav-link-mobile">Cerrar Sesión</button>
+              <Link to={user?.role === 'user' ? '/profile' : '/profile'} className="nav-link-mobile" onClick={closeMenu}>
+                <span className="material-icons-outlined">person</span> Perfil
+              </Link>
+              <button onClick={toggleTheme} className="nav-link-mobile" title="Cambiar tema">
+            <span className="material-icons-outlined">
+              {theme === 'light' ? 'dark_mode' : 'light_mode'}
+            </span>
+          </button>
+            </>
+          ) : (
+            <>
+              <div>
+                <Link to="/login" className="nav-link-mobile">Iniciar Sesión</Link>
+                <Link to="/register" className="nav-link-mobile">Registrarse</Link>
+                <Link to="/search" className="nav-link-mobile" onClick={closeMenu}>
+                    <span className="material-icons-outlined">search</span> Buscar Profesionales
+                </Link>
+
+              </div>
+            </>
+            
+            
+            
+          )}
+        </div>
+      </nav>
     )
 }
 

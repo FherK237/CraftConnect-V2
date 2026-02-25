@@ -1,10 +1,33 @@
-const { Job, Professional, Review, Sequelize} = require('../models/index');
+const { Job, Professional, Category, Review, Sequelize} = require('../models/index');
 const { Op } = require('sequelize'); // Importar Sequelize para literales
 
 
 //====================
 // FUNCION GET OBTENER LISTA DE OFICIOS
 //====================
+
+exports.getCategoriesTittles = async (req, res) => {
+    try {
+        console.log( {message: 'Lista de oficios.'});
+
+        const jobs = await Category.findAll({
+            attributes: ['id', 'title', 'description', 'status']
+        });
+
+        if (!jobs || !jobs.length === 0 ){
+            return res.status(404).json({ message:" La lista de oficios esta vacia." });
+        }
+
+        return res.status(200).json({ message: "Lista de categorias obtenida con exito.",
+            jobs: jobs
+        });
+
+
+    } catch (error) {
+        console.error({ message: 'Error al obtener la lista de oficios.', error});
+        return res.status(500).json({ message: "Error interno al obtener oficios."});
+    }
+};
 
 exports.getJobTittles = async (req, res) => {
     try {
@@ -37,8 +60,12 @@ exports.searchFixers = async (req, res) => {
     try {
         const { job_id, minRating, lat, lng, radiusKm = 20 } = req.query;
 
+        const userLat = lat ? parseFloat(lat) : null;
+        const userLng = lng ? parseFloat(lng) : null
+        const radius = radiusKm ? parseFloat(radiusKm) : 20
+        const ratingFilter = minRating ? parseFloat(minRating) : 0
+
         let whereConditions = {
-            role: 'professional',
             is_available: true
         };
         
@@ -47,66 +74,83 @@ exports.searchFixers = async (req, res) => {
             whereConditions.job_id = job_id;
         }
 
-        // 2. ATRIBUTO: DISTANCIA (Haversine)
-        let distanceAttribute = null;
-        if (lat && lng) {
-            const userLat = parseFloat(lat);
-            const userLng = parseFloat(lng);
-            const radius = parseFloat(radiusKm);
+        const attributes = [
+            'id', 'firstname', 'lastname', 'description', 'latitude', 'longitude', 'job_id', 'picture'
+        ];
 
-            distanceAttribute = Sequelize.literal(`(
+        // ATRIBUTO: DISTANCIA (Haversine)
+        let distanceLiteral = null;
+
+        const replacements = {}
+
+        if (userLat && userLng) {
+            replacements.lat = userLat
+            replacements.lng = userLng
+            replacements.radius = radius
+
+            distanceLiteral = Sequelize.literal(`(
                 6371 * acos(
-                    cos(radians(${userLat})) * cos(radians(Professional.latitude))
-                    * cos(radians(Professional.longitude) - radians(${userLng})) + 
-                    sin(radians(${userLat})) * sin(radians(Professional.latitude))
+                    cos(radians(:lat)) * cos(radians(Professional.latitude))
+                    * cos(radians(Professional.longitude) - radians(:lng)) + 
+                    sin(radians(:lat)) * sin(radians(Professional.latitude))
                 )
-            )`);
+            )`)
+
+            attributes.push([distanceLiteral, 'distance_km'])
+
+            whereConditions[Op.and] = Sequelize.where(distanceLiteral, {
+                [Op.lte]: radius
+            })
             
-            // Filtro de radio
-            whereConditions[Op.and] = [
-                Sequelize.literal(`(
-                    6371 * acos(
-                        cos(radians(${userLat})) * cos(radians(Professional.latitude))
-                        * cos(radians(Professional.longitude) - radians(${userLng})) + 
-                        sin(radians(${userLat})) * sin(radians(Professional.latitude))
-                    )
-                ) <= ${radius}`)
-            ];
+            // // Filtro de radio
+            // whereConditions[Op.and] = [
+            //     Sequelize.literal(`(
+            //         6371 * acos(
+            //             cos(radians(${userLat})) * cos(radians(Professional.latitude))
+            //             * cos(radians(Professional.longitude) - radians(${userLng})) + 
+            //             sin(radians(${userLat})) * sin(radians(Professional.latitude))
+            //         )
+            //     ) <= ${radius}`)
+            // ];
         }
 
-        // 3. ATRIBUTO: CALIFICACIÓN PROMEDIO (Subquery Corregida)
-        // 🛑 CORRECCIÓN: Calculamos el promedio buscando en reviews -> contracts -> professional
-        // Nota: Asegúrate que tu tabla en DB se llame 'reviews' y 'contracts' y la FK sea 'contracts_id' o 'contract_id'
+        // CALIFICACIÓN PROMEDIO (Subquery)
+        
         const ratingLiteral = Sequelize.literal(`(
-    SELECT AVG(r.rating)
-    FROM reviews AS r
-    INNER JOIN contracts AS c ON r.contract_id = c.id
-    WHERE c.professional_id = Professional.id
-)`);
+            SELECT COALESCE(AVG(r.rating), 0)
+            FROM reviews AS r
+            INNER JOIN contracts AS c ON r.contract_id = c.id
+            WHERE c.professional_id = Professional.id
+        )`);
 
-        // 4. FILTRO POR CALIFICACIÓN (HAVING)
+        attributes.push([ratingLiteral, 'average_rating'])
+
+        // FILTRO POR CALIFICACIÓN (HAVING)
         let havingConditions = null;
+
         if (minRating) {
             // Filtramos usando el literal que acabamos de definir
-            havingConditions = Sequelize.where(ratingLiteral, { [Op.gte]: parseFloat(minRating) });
+            havingConditions = Sequelize.where(ratingLiteral, {
+                [Op.gte]: ratingFilter
+            });
         }
 
-        // 5. EJECUTAR BÚSQUEDA
+        // EJECUTAR BÚSQUEDA
         const fixers = await Professional.findAll({
-            attributes: [
-                'id', 'firstname', 'lastname', 'description', 'latitude', 'longitude', 'job_id', 'picture',
-                // Añadimos los atributos calculados
-                [ratingLiteral, 'average_rating'],
-                ...(distanceAttribute ? [[distanceAttribute, 'distance_km']] : [])
-            ],
+            attributes: attributes,
             where: whereConditions,
             include: [
-                // Incluimos el Job para ver el nombre del oficio
-                { model: Job, as: 'job', attributes: ['title'] }
+                {
+                    model: Job,
+                    as: 'job',
+                    attributes: ['title']
+                }
             ],
-            
             having: havingConditions,
-            order: distanceAttribute ? [[Sequelize.literal('distance_km'), 'ASC']] : [['id', 'ASC']]
+            replacements: replacements,
+            order: distanceLiteral
+            ? [[Sequelize.col('distance_km'), 'ASC']] // Ordenar por cercanía si hay ubicación
+            : [['id', 'DESC']] // Si no mostrar los mas nuevos primero
         });
 
         if (!fixers || fixers.length === 0) {
@@ -114,7 +158,7 @@ exports.searchFixers = async (req, res) => {
         }
 
         return res.status(200).json({
-            message: 'Fixers encontrados con éxito.',
+            message: 'Busqueda exitosa.',
             results: fixers,
         });
 
@@ -161,7 +205,7 @@ exports.getFixerProfilePublic = async (req, res) => {
 module.exports = {
     getFixerProfilePublic: this.getFixerProfilePublic,
     searchFixers: this.searchFixers,
-    getJobTittles: this.getJobTittles
-
+    getJobTittles: this.getJobTittles,
+    getCategoriesTittles: this.getCategoriesTittles
 
 };

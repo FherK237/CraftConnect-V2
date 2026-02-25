@@ -1,10 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react"
 
 const AuthContext = createContext() //Creamos contexto
 
 export const AuthProvider = ({children}) => {
     const [user, setUser ] = useState(null)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+    
 
     useEffect(() => {
         const token = localStorage.getItem('token')
@@ -32,8 +34,21 @@ export const AuthProvider = ({children}) => {
         setIsAuthenticated(false)
     }
 
+    const updateUser = (nuevosDatos) => {
+        setUser((prevUser) => {
+            // 1. Fusionamos los datos viejos con los nuevos
+            const updatedUser = { ...prevUser, ...nuevosDatos };
+            
+            // 2. Sobrescribimos el localStorage para que no se pierda al recargar (F5)
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            
+            // 3. Devolvemos el nuevo usuario para que React actualice la pantalla
+            return updatedUser;
+        });
+    }
+
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, login, logout}}>
+        <AuthContext.Provider value={{ user, isAuthenticated, login, logout, updateUser}}>
             {children}
         </AuthContext.Provider>
     )

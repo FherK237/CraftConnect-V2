@@ -2,13 +2,20 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { registerUser } from "../services/auth.service"
 import InputGroup from "../components/ui/InputGroup"
-import './LoginPage.css'
 import Footer from "../components/layout/Footer"
+import logoCraft from '../assets/CC-logo-v2.png'
 import NavBar from '../components/layout/NavBar'
+import InputPass from "../components/ui/InputPass"
+import './RegisterPage.css'
+import './LoginPage.css'
 
 function RegisterPage() {
-    
     const [role, setRole] = useState(null)
+
+    const [showPass, setShowPass] = useState(null)
+    const togglePassVisibility = () => {
+        setShowPass(!showPass)
+    }
 
     const [formDataR, setformDataR ] = useState({
         firstname: '',
@@ -17,37 +24,9 @@ function RegisterPage() {
         password: '',
         role: setRole
     })
-    const navigate = useNavigate()
-    if (!role) {
-        return (
-            <>
-            <NavBar/>
-                <div className="role-selection-container" style={{ textAlign: 'center', marginTop: '50px' }}>
-                    <h2>¿Cómo quieres usar CrafterConnect?</h2>
-                    
-                    <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '30px' }}>
-                        {/* OPCIÓN CLIENTE */}
-                        <button 
-                            onClick={() => setRole('user')}
-                            style={{ padding: '30px', cursor: 'pointer', border: '2px solid #007bff', borderRadius: '10px', background: 'white' }}
-                        >
-                            <h3>Soy Cliente</h3>
-                            <p>Busco profesionales para mi hogar</p>
-                        </button>
 
-                        {/* OPCIÓN FIXER */}
-                        <button 
-                            onClick={() => setRole('fixer')}
-                            style={{ padding: '30px', cursor: 'pointer', border: '2px solid #28a745', borderRadius: '10px', background: 'white' }}
-                        >
-                            <h3>Soy Fixer</h3>
-                            <p>Quiero ofrecer mis servicios</p>
-                        </button>
-                    </div>
-                </div>
-            </>
-        );
-    }
+    const navigate = useNavigate()
+
     const handleChange = (e) => {
         const { name, value } = e.target
         setformDataR({
@@ -55,11 +34,13 @@ function RegisterPage() {
             [name]: value
         })
     }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         try  {
             const dataToSend = { ...formDataR, role: role };
             const data = await registerUser(dataToSend);
+            
             console.log('registro exitoso:' , data)
             alert("¡Registro exitoso! Por favor revisa tu correo electronico.");
             navigate('/email-sent', { state: { email: formDataR.email} });
@@ -69,38 +50,79 @@ function RegisterPage() {
         }
     }
 
-    return (
-        <>
-            <div className="navbar">
-                <Link to="/home" className="navbar-brand">
-                    <img src="CC-logo-v2.png" alt="" className="logo-craftt"/>
-                </Link>
+    if (!role) {
+        return (
+            <div className="login-page-wrapper">
+                <NavBar/>
+
+                <div className="role-selection-card">
+                    <h2 className="login-title" style={{ textAlign: 'center', marginBottom: '30px' }}>
+                        ¿Cómo quieres usar CraftConnect?
+                    </h2>
+                    
+                    <div className="role-buttons-container">
+                        {/* OPCIÓN CLIENTE */}
+                        <button className="role-btn" onClick={() => setRole('user')}>
+                            <span className="material-icons-outlined role-icon client-icon">person_search</span>
+                            <h3>Soy Cliente</h3>
+                            <p>Busco profesionales para mi hogar</p>
+                        </button>
+
+                        {/* OPCIÓN FIXER */}
+                        <button className="role-btn" onClick={() => setRole('fixer')}>
+                            <span className="material-icons-outlined role-icon fixer-icon">handyman</span>
+                            <h3>Soy Fixer</h3>
+                            <p>Quiero ofrecer mis servicios</p>
+                        </button>
+                    </div>
+                    <p className="login-footer-text" style={{ marginTop: '40px' }}>
+                            ¿Ya tienes una cuenta? {" "}
+                            <Link to='/login' className="login-link">
+                                Inicia Sesión
+                            </Link>
+                    </p>
+                </div>
             </div>
+        );
+    }
 
-            <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-                <h2 style={{ textAlign: 'center' }}>Crear una cuenta</h2>
+    return (
+        <div className="login-page-wrapper">
+            <div className="login-card" style={{ marginTop: '40px' }}>
+                <button type="button" className="btn-back-role" onClick={() => setRole(null)}>
+                    <span className="material-icons-outlined">arrow_back</span>
+                    Cambiar tipo de cuenta
+                </button>
+                <div className="login-header" style={{ marginBottom: '20px' }}>
+                    <Link to='/home'>
+                    <img src={logoCraft} alt="CraftConnect Logo" className="login-logo"/>
+                    </Link>
 
-                <button onClick={() => setRole(null)}>← Cambiar tipo de cuenta</button>
-                <h3>Registrándose como: {role === 'user' ? 'Cliente' : 'Fixer'}</h3>
-                <hr />
+                <h2 className="login-title">Crear una cuenta</h2>
+                <p className="login-subtitle">
+                    Registrándose como: <strong style={{ color: '#2563eb' }}>{role === 'user' ? 'Cliente' : 'Fixer'}</strong>
+                </p>
+                </div>
+                <form onSubmit={handleSubmit} className="login-form">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                        <InputGroup 
+                            label="Nombre"
+                            type="text"
+                            name="firstname"
+                            value={formDataR.firstname}
+                            onChange={handleChange}
+                            placeholder="KESO KLUMA"
+                        />
+                        <InputGroup 
+                            label="Apellido"
+                            type="text"
+                            name="lastname"
+                            value={formDataR.lastname}
+                            onChange={handleChange}
+                            placeholder="Pérez"
+                        />
+                    </div>
 
-                <form onSubmit={handleSubmit}>
-                    <InputGroup 
-                        label="Nombre"
-                        type="text"
-                        name="firstname"
-                        value={formDataR.firstname}
-                        onChange={handleChange}
-                        placeholder="KESO KLUMA"
-                    />
-                    <InputGroup 
-                        label="Apellido"
-                        type="text"
-                        name="lastname"
-                        value={formDataR.lastname}
-                        onChange={handleChange}
-                        placeholder="Pérez"
-                    />
                     <InputGroup 
                         label="Correo electrónico"
                         type="email"
@@ -110,32 +132,30 @@ function RegisterPage() {
                         placeholder="ejemplo@correo.com"
                     />
 
-                    <InputGroup
+                    <InputPass
                         label="Contraseña"
-                        type="password"
+                        type={showPass ? "text" : "password"}
                         name="password"
                         value={formDataR.password}
                         onChange={handleChange}
-                        placeholder="********"
+                        placeholder="Minimo 8 caracteres"
+                        type2="button"
+                        onClick={togglePassVisibility}
+                        button={showPass ? 'visibility_off' : 'visibility'}
                     />
 
-                    <button
-                    type="submit"
-                    style={{ marginTop: '10px', padding: '10px', width: '100%' }}
-                    >
+                    <button type="submit" className="btn-submit-login">
                         Registrarse
                     </button>
                 </form>
-                <p>
+                <p className="login-footer-text">
                     ¿Ya tienes una cuenta? {''}
-                    <Link to='/login'>
+                    <Link to='/login' className="login-link">
                         Login
                     </Link>
                 </p>
             </div>
-
-            <Footer/>
-        </>
+        </div>
         
     )
 }

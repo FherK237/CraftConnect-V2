@@ -1,31 +1,47 @@
+import { useEffect, useState } from 'react'
 import './CategoriasCarrusel.css'
-
-const categorias = [
-    { id: 1, name: "Plomería", icon: "🚰" },
-    { id: 2, name: "Electricidad", icon: "⚡" },
-    { id: 3, name: "Carpintería", icon: "🪚" },
-    { id: 4, name: "Limpieza", icon: "🧹" },
-    { id: 5, name: "Pintura", icon: "🎨" },
-    { id: 6, name: "Jardinería", icon: "🌿" },
-    { id: 7, name: "Albañilería", icon: "🧱" },
-    { id: 8, name: "Mecánica", icon: "🔧" },
-    
-]
+import CategoryCard from './CategoryCard'
+import api from '../../services/api'
 
 function CategoriasCarrusel() {
+    const [categories, setCategories] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchCategory = async () => {
+            try {
+                const {data} = await api.get('/category/')
+                console.log("Data cruda del backend desde CatCarrusel:", data)
+
+                const listaCat = data.jobs || data.results || [];
+
+                setCategories(listaCat.slice(0, 10))
+
+            } catch (error) {
+                console.error("Error al cargar carrusel:", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchCategory()
+    }, [])
+
+    if (loading) return <div> Cargando oficios...</div>
+    if (categories.length === 0) return null
+
     return (
         <section className="categories-container">
-            <h2 className="categories-title">¿Qúe necesitas arreglar hoy?</h2>
+            <h2 className="categories-title">Nuestro Servicios</h2>
 
             <div className="categories-scroll">
-                {categorias.map((cat) => (
-                    <div key={cat.id} className="category-card">
-                        <div className="category-icon">{cat.icon}</div>
-                        <span className="category-name">{cat.name}</span>
+                {categories.map((cat) => (
+                    <div key={cat.id} style={{ minWidth: '250px' }}>
+                        <CategoryCard category={cat} />
                     </div>
                 ))}
             </div>
         </section>
+        
     )
 }
 

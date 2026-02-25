@@ -1,7 +1,9 @@
-const { Contract, User, Comission, Service, Professional, Review } = require('../models/index');
+const { Contract, User, Conversation, Comission, Service, Professional, Review } = require('../models/index');
 const { validationResult } = require('express-validator');
 const pdf = require('html-pdf')
 const getContractHtml = require('../utils/pdfTemplates')
+const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 
 exports.createContract = async (req, res) => {
     try {
@@ -301,46 +303,80 @@ exports.completeContract = async (req, res) => {
         }
     }
 
-exports.getChatHistory = async (req, res) => {
-    try {
-        const userId = req.user.id; // Tu ID (Fixer o Cliente)
-        const { partnerId } = req.params; // El ID de la persona con la que hablas
+    exports.getChatHistory = async (req, res) => {
+        try {
+            const currentUser = req.user;
+            let userId = currentUser.id;
+            // Identificamos exactamente quién soy yo en la base de datos
+            const userType = currentUser.role === 'user' ? 'user' : 'professional';
+            
+            if (userType === 'professional') {
+                // Nota: Verifica si tu columna en la BD se llama 'user_id' o 'userId'
+                const prof = await Professional.findOne({ where: { user_id: currentUser.id } });
+                if (prof) {
+                    userId = prof.id; 
+                }
+            }
 
-        // Validar que partnerId exista
-        if (!partnerId) {
-            return res.status(400).json({ message: 'Falta el ID del participante.' });
+            const { partnerId } = req.params; 
+    
+            // Si yo soy cliente, hablo con un fixer. Y viceversa.
+            const partnerType = userType === 'user' ? 'professional' : 'user';
+    
+            // Validar que partnerId exista
+            if (!partnerId) {
+                return res.status(400).json({ message: 'Falta el ID del participante.' });
+            }
+    
+            // Buscar todos los mensajes EXACTOS entre Tú y el Partner
+            const messages = await Conversation.findAll({
+                where: {
+                    [Op.or]: [
+                        // Mensajes que YO envié al OTRO (Validando IDs y Tipos)
+                        { 
+                            sender_id: userId, 
+                            sender_type: userType,
+                            receiver_id: partnerId,
+                            receiver_type: partnerType
+                        },
+                        // Mensajes que el OTRO me envió a MÍ (Validando IDs y Tipos)
+                        { 
+                            sender_id: partnerId, 
+                            sender_type: partnerType,
+                            receiver_id: userId, 
+                            receiver_type: userType
+                        }
+                    ]
+                },
+                // Ordenar del más viejo al más nuevo para que se lean de arriba hacia abajo
+                order: [['created_at', 'ASC']] 
+            });
+    
+            return res.status(200).json({
+                message: 'Historial recuperado con éxito.',
+                chatHistory: messages
+            });
+    
+        } catch (error) {
+            console.error('Error al obtener historial:', error);
+            return res.status(500).json({ message: 'Error al cargar los mensajes.' });
         }
-
-        // Buscar todos los mensajes entre Tú y el Partner
-        const messages = await Conversation.findAll({
-            where: {
-                [Op.or]: [
-                    // Mensajes que YO envié al OTRO
-                    { sender_id: userId, receiver_id: partnerId },
-                    // Mensajes que el OTRO me envió a MÍ
-                    { sender_id: partnerId, receiver_id: userId }
-                ]
-            },
-            // Ordenar del más viejo al más nuevo para que se lean en orden cronológico
-            order: [['created_at', 'ASC']] 
-        });
-
-        return res.status(200).json({
-            message: 'Historial recuperado con éxito.',
-            chatHistory: messages
-        });
-
-    } catch (error) {
-        console.error('Error al obtener historial:', error);
-        return res.status(500).json({ message: 'Error al cargar los mensajes.' });
-    }
-};
+    };
 
     exports.getConversationList = async (req, res) => {
     try {
         const currentUser = req.user; // Fixer o Cliente logueado
-        const userId = currentUser.id;
+        let userId = currentUser.id;
         const userType = currentUser.role === 'user' ? 'user' : 'professional';
+
+        if (userType === 'professional') {
+            // Nota: Verifica si tu columna en la BD se llama 'user_id' o 'userId'
+            const prof = await Professional.findOne({ where: { user_id: currentUser.id } });
+            if (prof) {
+                userId = prof.id; 
+            }
+        }
+
         // 1. Encontrar todos los IDs de usuarios con los que este usuario ha chateado.
         // Se buscan las conversaciones donde el usuario logueado es el remitente O el receptor.
         const conversationPartners = await Conversation.findAll({
@@ -373,21 +409,47 @@ exports.getChatHistory = async (req, res) => {
             order: [[Sequelize.literal('lastMessageAt'), 'DESC']] // Mostrar los más recientes primero
         });
 
-        // 2. Extracción de los IDs y tipos de los participantes
         const partners = conversationPartners.map(p => ({
             id: p.getDataValue('partnerId'),
-            type: p.getDataValue('partnerType')
-        }));
-        
-        // 3. (Opcional pero recomendado) Obtener nombres y fotos de los participantes
-        // Si tienes las relaciones definidas, puedes optimizar esto con un JOIN.
-        // Por ahora, devolvemos la lista de IDs únicos.
+            type: p.getDataValue('partnerType'),
+            //enviar la fecha del ultimo mensaje para que lo muestre react
+            lastMessageAt: p.getDataValue('lastMessageAt')
+        }))
+        // buscar nombre y foto de cada contacto
+
+        const conversacionesConDetalles = await Promise.all(
+            partners.map(async (partner) => {
+                let detalles = null
+
+                if (partner.type === 'professional') {
+                    detalles = await Professional.findByPk(partner.id, {
+                        attributes: ['firstname', 'lastname', 'picture']
+                    })
+                } else {
+                    detalles = await User.findByPk(partner.id, {
+                        attributes: ['firstname', 'lastname', 'picture']
+                    })
+                }
+
+                if (!detalles) return null
+                
+
+                return {
+                    id: partner.id,
+                    type: partner.type,
+                    name: `${detalles.firstname} ${detalles.lastname}`,
+                    picture: detalles.picture,
+                    lastMessageAt: partner.lastMessageAt
+                }
+            })
+        )
+
+        const conversacionesLimpias = conversacionesConDetalles.filter(c => c !== null)
 
         return res.status(200).json({
-            message: 'Lista de conversaciones obtenida con éxito.',
-            conversations: partners,
-            // NOTA: El frontend usará estos IDs y tipos para cargar los nombres y el historial del chat.
-        });
+            message: 'Lista de convesaciciones obtenida con exito',
+            conversations: conversacionesLimpias,
+        })
     } catch (error) {
         console.error('Error al obtener lista de conversaciones:', error);
         return res.status(500).json({ message: 'Error interno al obtener la lista de chats.' });
