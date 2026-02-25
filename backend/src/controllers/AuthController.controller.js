@@ -229,7 +229,8 @@ require('dotenv').config();
                         firstname: account.firstname,
                         lastname: account.lastname,
                         email: account.email,
-                        role: detectedRole
+                        role: detectedRole,
+                        picture: account.picture
                     },
             });
 

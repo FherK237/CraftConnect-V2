@@ -10,5 +10,6 @@ const { Router } = require('express');
     router.use('/contracts', require('./contract.route'));
     router.use('/jobs', require('./jobs.routes'))
     router.use('/fixers', require('./fixers.routes'))
+    router.use('/category', require('./categories.routes'))
 
     module.exports = router;

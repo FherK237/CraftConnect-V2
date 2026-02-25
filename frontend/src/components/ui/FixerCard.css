@@ -1,0 +1,223 @@
+/* .fixer-card {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-color, white);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 250px;
+}
+
+.fixer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.fixer-image-container {
+  height: 150px;
+  width: 100px;
+  background-color: var(--bg-color);
+}
+
+.fixer-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.fixer-content {
+  padding: 15px;
+  text-align: center;
+}
+
+.fixer-name {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  color: var(--text-color, #333);
+}
+
+.fixer-job {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.fixer-stats {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.fixer-rating {
+  color: #f39c12;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px; 
+}
+
+.fixer-distance {
+  color: #2ecc71;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fixer-button {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.fixer-button:hover {
+  background-color: #0056b3;
+} */
+
+/* FixerCard.css - Estilo Moderno 2026 */
+
+.fixer-card {
+    background-color: var(--bg-color, #ffffff);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    /* Sombra súper suave y difuminada */
+    box-shadow: 0 1px 10px 5px rgba(0, 0, 0, 0.071); 
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ayuda si las tarjetas están en un grid */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.fixer-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); /* La sombra crece suavemente */
+}
+
+.fixer-image-container {
+    height: 180px; /* Un poco más alta para mayor impacto visual */
+    width: 100%;
+    background-color: var(--bg-color); /* Gris neutro moderno mientras carga */
+    position: relative;
+}
+
+.fixer-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+/* Pequeño zoom a la imagen al hacer hover a la tarjeta (Toque Senior) */
+.fixer-card:hover .fixer-image {
+    transform: scale(1.05);
+}
+
+.fixer-content {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Empuja el botón siempre hacia abajo */
+}
+
+.fixer-name {
+    margin: 0 0 4px 0;
+    font-size: 1.25rem;
+    font-weight: 700; /* Letra más gruesa para el título */
+    color: var(--text); /* Casi negro, mejor contraste que el gris oscuro */
+    letter-spacing: -0.02em; /* Aprieta un poquito las letras, estilo Apple */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fixer-job {
+    margin: 0 0 16px 0;
+    color: var(--navbar-text); /* Un azul eléctrico moderno */
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em; /* Separa un poco las letras mayúsculas */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fixer-stats {
+    display: flex;
+    justify-content: flex-start; /* Alineado a la izquierda se ve más editorial */
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.fixer-rating {
+    color: var(--navbar-text); /* Texto oscuro para la calificación */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Hacemos que la estrellita sí sea amarilla, pero el texto oscuro */
+.fixer-rating .material-icons {
+    color: #fbbf24; 
+    font-size: 20px;
+}
+
+.fixer-distance {
+    color: #6b7280; /* Un gris sutil para no robar atención */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+}
+
+.fixer-distance .material-icons {
+    font-size: 18px;
+    color: #9ca3af;
+}
+
+.fixer-button {
+    display: block;
+    width: 100px;
+    padding: 12px 0; /* Botones más "gorditos" son más fáciles de tocar en móviles */
+    background-color: var(--primary-color); /* Botón oscuro, muy de moda (estilo Vercel/Notion) */
+    color: var(--text-default);
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px; /* Curva moderada en el botón */
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    margin-top: auto; /* Mantiene el botón pegado abajo si el texto de arriba varía */
+    transition: border 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+    box-sizing: border-box;
+}
+
+.fixer-button:hover {
+    background-color: var(--bg-color); /* Aclara ligeramente al pasar el mouse */
+    color: var(--text);
+    border: 1px solid var(--text);
+}
+
+.fixer-button:active {
+    transform: scale(0.98); /* Pequeño efecto de hundimiento al hacer clic */
+}

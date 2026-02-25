@@ -25,7 +25,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:3001",
+        origin: process.env.CLIENT_URL,
         methods: ["GET", "POST"]
     }
 });
@@ -50,14 +50,14 @@ app.use('/uploads', express.static('uploads'));
         res.send('Bienvenido professional :)');
     });
 
-    app.get('/', async(req, res) => {
-        try {
-            const categories = await Category.findAll();
-                res.json({categories: categories});
-        } catch (error) {
-            res.status(400).json({message: error.message});
-        }
-    });
+    // app.get('/', async(req, res) => {
+    //     try {
+    //         const categories = await Category.findAll();
+    //             res.json({categories: categories});
+    //     } catch (error) {
+    //         res.status(400).json({message: error.message});
+    //     }
+    // });
 
     
 

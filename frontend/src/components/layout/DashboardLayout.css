@@ -1,0 +1,78 @@
+/* DashboardLayout.css */
+
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f9fafb; /* Un gris muy tenue para que las tarjetas blancas resalten */
+}
+
+/* Área de trabajo en PC */
+.dashboard-main-content {
+    flex-grow: 1;
+    margin-left: 260px; /* Respeta el ancho exacto del Sidebar */
+    padding: 30px;
+    transition: margin-left 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Ocultamos la barra superior en PC porque el menú ya está visible */
+.mobile-dashboard-header {
+    display: none;
+}
+
+/* --- MAGIA RESPONSIVA (Celulares y Tablets pequeñas) --- */
+@media (max-width: 900px) {
+    .dashboard-wrapper {
+        flex-direction: column;
+    }
+
+    /* El menú lateral se ocultó (gracias al CSS del Sidebar), 
+       así que quitamos el margen para que el contenido use toda la pantalla */
+    .dashboard-main-content {
+        margin-left: 0; 
+        padding: 20px;
+        padding-top: 80px; /* Dejamos espacio para que la cabecera móvil no tape el contenido */
+    }
+
+    /* Aparece la barra superior con el botón de hamburguesa */
+    .mobile-dashboard-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background-color: #ffffff;
+        height: 60px;
+        padding: 0 20px;
+        border-bottom: 1px solid #e5e7eb;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 900; /* Un poco por debajo del Sidebar (que tiene 1000) */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+    }
+
+    .btn-menu-mobile {
+        background: transparent;
+        border: none;
+        color: #111827;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-menu-mobile:active {
+        background-color: #f3f4f6;
+    }
+
+    .mobile-dashboard-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+    }
+}

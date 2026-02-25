@@ -1,0 +1,65 @@
+.category-title {
+  font-size: 15px;
+  background-color: var(--primary-color);
+  color: var(--text-2);
+  border-radius: 15px;
+  padding: 10px 0;
+  width: 100%;
+  height: 30px;
+  align-content: center;
+  margin-top: 0;
+}
+
+.category-card {
+  margin: 10px;
+
+  }
+.category-container {
+  
+  text-align: center;
+  height: 100%;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 10px 1px rgba(0, 0, 0, 0.223);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Esto centra TODOS los hijos horizontalmente */
+  padding-bottom: 15px; /* Un poco de espacio abajo para que el botón no pegue con el borde */
+}
+.category-description {
+  font-size: 13px;
+  font-weight: 400;
+  padding: 5px;
+  height: 50px;
+}
+
+
+
+.btn-explore {
+    width: 100px;
+    padding: 12px 0; /* Botones más "gorditos" son más fáciles de tocar en móviles */
+    background-color: var(--primary-color); /* Botón oscuro, muy de moda (estilo Vercel/Notion) */
+    color: var(--text-default);
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px; /* Curva moderada en el botón */
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: border 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+    border: 1px solid transparent; /* Truco: borde invisible para que no brinque en el hover */
+    margin-top: auto; /* Lo empuja hasta el fondo */
+    margin-bottom: 0;
+    margin-left: auto; /* Centrado horizontal seguro */
+    margin-right: auto; /* Centrado horizontal seguro */
+}
+
+.btn-explore:hover {
+  background-color: var(--bg-color); /* Aclara ligeramente al pasar el mouse */
+  color: var(--text-1);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-explore:active {
+  transform: scale(0.98); /* Pequeño efecto de hundimiento al hacer clic */
+}

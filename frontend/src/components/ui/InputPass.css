@@ -1,0 +1,45 @@
+/* InputPass.css */
+
+/* La caja envolvente debe ser 'relative' para que el botón sepa dónde anclarse */
+.input-pass-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* Le damos espacio extra a la derecha del texto para que al escribir
+   no se encime debajo del ícono del ojito */
+.input-with-icon {
+    padding-right: 45px !important; 
+}
+
+/* El botón flotante */
+.btn-toggle-pass {
+    position: absolute; /* Lo saca del flujo normal y lo deja flotar */
+    right: 12px;        /* Lo pegamos al borde derecho */
+    top: 50%;           /* Lo bajamos a la mitad */
+    transform: translateY(-50%); /* Lo centramos verticalmente de forma perfecta */
+    
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #6b7280; /* Gris sutil */
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Efecto hover sobre el ojito */
+.btn-toggle-pass:hover {
+    color: #111827; /* Se oscurece al pasar el mouse */
+    background-color: #f3f4f6; /* Círculo gris de fondo muy suave */
+}
+
+.btn-toggle-pass:active {
+    transform: translateY(-50%) scale(0.9); /* Pequeño clic visual */
+}

@@ -1,0 +1,99 @@
+/* RegisterPage.css */
+
+/* --- PANTALLA DE SELECCIÓN DE ROL --- */
+.role-selection-card {
+    width: 100%;
+    max-width: 700px;
+    background-color: transparent;
+    margin: 80px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.role-buttons-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.role-btn {
+    flex: 1; /* Hacen que ambos botones midan exactamente lo mismo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.role-btn h3 {
+    margin: 15px 0 10px 0;
+    font-size: 1.4rem;
+    color: #111827;
+}
+
+.role-btn p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.role-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+/* Colores específicos para cada botón */
+.client-icon {
+    color: #2563eb; /* Azul para clientes */
+}
+
+.fixer-icon {
+    color: #2ecc71; /* Verde para Fixers */
+}
+
+/* Efectos flotantes (Hover) */
+.role-btn:hover {
+    transform: translateY(-8px);
+    border-color: #2563eb;
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.15); /* Sombra azuladita */
+}
+
+/* El segundo botón (Fixer) brilla en verde en lugar de azul */
+.role-btn:nth-child(2):hover {
+    border-color: #2ecc71;
+    box-shadow: 0 15px 35px rgba(46, 204, 113, 0.15); 
+}
+
+/* --- BOTÓN DE REGRESAR --- */
+.btn-back-role {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    transition: color 0.2s ease;
+}
+
+.btn-back-role:hover {
+    color: #111827;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .role-buttons-container {
+        flex-direction: column; /* Pone un botón debajo del otro en celular */
+        gap: 20px;
+    }
+}

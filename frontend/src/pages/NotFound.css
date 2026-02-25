@@ -1,0 +1,62 @@
+/* NotFound.css */
+.not-found-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f3f4f6;
+  text-align: center;
+  padding: 20px;
+}
+
+.not-found-content {
+  max-width: 500px;
+  background: white;
+  padding: 50px 30px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.not-found-title {
+  font-family: Poppins;
+  font-size: 6rem;
+  font-weight: 800;
+  color: #2563eb; /* Tu azul corporativo */
+  margin: 0;
+  line-height: 1;
+}
+
+.not-found-subtitle {
+  font-family: Poppins;
+  font-size: 1.5rem;
+  color: #111827;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.not-found-text {
+  font-family: Poppins;
+  color: #6b7280;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.not-found-btn {
+  font-family: Poppins;
+  display: inline-block;
+  background-color: #2563eb;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.not-found-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.not-found-btn:active {
+  transform: scale(0.97);
+}

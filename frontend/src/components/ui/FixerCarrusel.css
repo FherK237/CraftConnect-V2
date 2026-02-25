@@ -1,6 +1,9 @@
 .fixer-section {
   padding: 20px;
-
+  background-color: var(--card-bg);
+}
+.fixers-title {
+  color: var(--text-1);
 }
 
 .fixer-scroll {
@@ -11,7 +14,6 @@
   scroll-snap-type: x mandatory;
 }
 
-/* Scrollbar estilo */
 .fixer-scroll::-webkit-scrollbar {
   height: 6px;
 }
@@ -20,61 +22,5 @@
   border-radius: 10px;
 } 
 
-.fixer-card {
-  min-width: 250px; 
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  padding: 15px;
-  scroll-snap-align: center;
-  border: 1px solid var(--navbar-bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-.fixer-photo {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 10px;
-  border: 3px solid #003366;
-}
 
-.fixer-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 5px 0;
-}
 
-.fixer-job {
-  color: var(--navbar-tex);
-  font-size: 0.9rem;
-  margin-bottom: 5px;
-  background-color: var(--terceary-color);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.fixer-rating {
-  color: #ffc107; 
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.btn-profile {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  width: 100%;
-  transition: background 0.2s;
-}
-
-.btn-profile:hover {
-  background-color: var(--primary-color);
-}
