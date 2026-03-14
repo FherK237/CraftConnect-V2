@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { useTheme } from "../../context/ThemeContext"
-import logoCraft from '../../assets/CC-logo-v2.png'
+import logoCraft from '../../assets/CC-logo-img.png'
 import './NavBar.css'
 import { useState } from "react"
 
@@ -31,6 +31,7 @@ const NavBar = () => {
         {/* LOGO*/}
         <Link to="/home" className="navbar-brand" onClick={closeMenu}>
           <img src={logoCraft} alt="Logo CraftConnect" className="logo-craft" />
+          <span className="logo-texto-pro">Craft</span><span className="logo-texto-pro2">Connect</span>
         </Link>
 
         {/* EMENU ESCRITORIO */}
@@ -77,7 +78,7 @@ const NavBar = () => {
 
         <div className={`mobile-dropdown ${isMobileMenuOpen ? 'show' : ''}`}>
           {isAuthenticated ? (
-            <>
+            <div className="mobile-blur">
               <Link to="/search" className="nav-link-mobile" onClick={closeMenu}>
                 <span className="material-icons-outlined">search</span> Buscar
               </Link>
@@ -86,11 +87,11 @@ const NavBar = () => {
                 <span className="material-icons-outlined">person</span> Perfil
               </Link>
               <button onClick={toggleTheme} className="nav-link-mobile" title="Cambiar tema">
-            <span className="material-icons-outlined">
-              {theme === 'light' ? 'dark_mode' : 'light_mode'}
-            </span>
-          </button>
-            </>
+                <span className="material-icons-outlined">
+                  {theme === 'light' ? 'dark_mode' : 'light_mode'}
+                </span>
+              </button>
+            </div>
           ) : (
             <>
               <div>

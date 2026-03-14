@@ -82,7 +82,7 @@ function HomePage() {
                 </div>
             </section>
 
-            {/* --- 4. LOS CARRUSELES (Tus componentes estrella) --- */}
+            {/* --- 4. CARRUSELES --- */}
             <section className="explore-section">
                 <div className="carousel-wrapper">
                     <h2 className="carousel-title">Servicios más solicitados</h2>

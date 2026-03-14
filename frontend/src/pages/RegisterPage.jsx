@@ -53,8 +53,6 @@ function RegisterPage() {
     if (!role) {
         return (
             <div className="login-page-wrapper">
-                <NavBar/>
-
                 <div className="role-selection-card">
                     <h2 className="login-title" style={{ textAlign: 'center', marginBottom: '30px' }}>
                         ¿Cómo quieres usar CraftConnect?

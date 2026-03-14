@@ -1,12 +1,29 @@
-  .navbar {
+.logo-texto-pro {
+    color: #213787;
+    font-family: Poppins;
+    font-weight: 600;
+    padding-left: 3px;
+    font-size: 15px;
+    transition: transform 0.3s ease;
+}
+.logo-texto-pro2 {
+    color: #0986c9;
+    font-family: Poppins;
+    font-weight: 600;
+    padding-right: 5px;
+    font-size: 15px;
+    transition: transform 0.3s ease;
+}
+
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 80%; /* Un poco más ancho para que quepan bien los enlaces */
     max-width: 1200px;
-    height: 55px; /* Un poco más alto para que respiren los elementos */
+    height: 50px; /* Un poco más alto para que respiren los elementos */
     background-color: var(--navbar-backg, rgba(255, 255, 255, 0.8));
-    backdrop-filter: blur(12px); /* Efecto cristal */
+    backdrop-filter: blur(15px); /* Efecto cristal */
     -webkit-backdrop-filter: blur(12px); /* Soporte para Safari */
     border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
     border-radius:14px;
@@ -26,18 +43,22 @@
     align-items: center;
     text-decoration: none;
     flex-shrink: 0; /* Evita que el logo se aplaste */
-}
-
-.logo-craft {
-    height: 35px;
-    width: auto;
-    object-fit: contain;
     transition: transform 0.3s ease;
 }
 
-.logo-craft:hover {
+.logo-craft {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    padding-left: 8px;
+}
+
+
+.navbar-brand:hover {
     transform: scale(1.05);
 }
+
 
 /* --- MENÚ CENTRAL --- */
 .nav-menu {
@@ -135,11 +156,14 @@
 .btn-login-text {
     color: #000000;
     font-weight: 600;
+    background-color: #ffffff4e;
+    padding: 8px 13px;
+    border-radius: 8px;
 }
 
 .btn-login-text:hover {
-    background-color: rgba(37, 99, 235, 0.1);
-    color: #1d4ed8;
+    background-color: rgba(131, 144, 175, 0.392);
+    color: #000000;
 }
 
 .btn-login-text:active {
@@ -188,10 +212,14 @@
     position: absolute;
     top: 70px; /* Se posiciona justo debajo de la barra */
     right: 20px;
-    background-color: var(--navbar-backg, #ffffff);
+    background-color: var(--navbar-backg, rgba(255, 255, 255, 0.8));
+
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    
     border: 1px solid var(--border-color, #e5e7eb);
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.101);
     padding: 15px;
     display: flex;
     flex-direction: column;

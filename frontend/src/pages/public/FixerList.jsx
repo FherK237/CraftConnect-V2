@@ -90,7 +90,7 @@ function FixerList() {
       <section className="search-header-section">
         <div className="search-header-content">
           <h1 className="search-main-title">Encuentra al fixer ideal</h1>
-          <p className="search-subtitle">Buscar por nombre o filtrar por oficio.</p>
+          <p className="search-subtitle">Buscar por nombre o filtra por oficio.</p>
 
           <form onSubmit={handleSearchSubmit} className="search-form-bar">
             <div className="search-input-group">
